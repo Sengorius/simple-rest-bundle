@@ -1,0 +1,38 @@
+{
+    "name": "skript-manufaktur/simple-rest-bundle",
+    "description": "Upgrading a Symfony project with capabilities of a simple REST API.",
+    "keywords": ["skript-manufaktur", "API", "REST"],
+    "homepage": "https://github.com/Sengorius/simple-rest-bundle.git",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Skript-Manufaktur - Patrick Blawert",
+            "email": "mail@skript-manufaktur.de",
+            "homepage": "https://skript-manufaktur.de/"
+        }
+    ],
+    "require": {
+        "php": ">=7.4.0",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "symfony/flex": "^1.3.1",
+        "symfony/framework-bundle": "*",
+        "symfony/property-access": "*",
+        "symfony/property-info": "*"
+    },
+    "require-dev": {},
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "SkriptManufaktur\\SimpleRestBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SkriptManufaktur\\SimpleRestBundle\\": "tests/"
+        }
+    }
+}
