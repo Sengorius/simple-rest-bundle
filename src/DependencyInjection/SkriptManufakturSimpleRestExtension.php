@@ -3,8 +3,20 @@
 namespace SkriptManufaktur\SimpleRestBundle\DependencyInjection;
 
 use Exception;
+use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiControllerFactory;
+use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiHandlerFactory;
+use SkriptManufaktur\SimpleRestBundle\Component\ApiBusWrapper;
+use SkriptManufaktur\SimpleRestBundle\Component\ApiFilterService;
+use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
+use SkriptManufaktur\SimpleRestBundle\Listener\RequestListener;
+use SkriptManufaktur\SimpleRestBundle\Voter\GrantingMiddleware;
+use SkriptManufaktur\SimpleRestBundle\Voter\RoleService;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 /**
  * Class SkriptManufakturSimpleRestExtension
@@ -23,5 +35,66 @@ class SkriptManufakturSimpleRestExtension extends Extension
     {
         // load the configuration
         $configuration = $this->processConfiguration(new Configuration(), $configs);
+
+        // register the simple services
+        $container->setDefinition(
+            ApiBusWrapper::class,
+            (new Definition(ApiBusWrapper::class, [new Reference(MessageBusInterface::class)]))
+        );
+        $container->setAlias('skriptmanufaktur.simple_rest.component.api_bus_wrapper', ApiBusWrapper::class);
+
+        $container->setDefinition(ApiFilterService::class, (new Definition(ApiFilterService::class)));
+        $container->setAlias('skriptmanufaktur.simple_rest.component.api_filter_service', ApiBusWrapper::class);
+
+        // register all our provider interfaces with a tag
+        $abstractApiServices = [
+            new Reference('validator'),
+            new Reference('serializer'),
+            new Reference(ApiBusWrapper::class),
+            new Reference(ApiFilterService::class),
+        ];
+
+        $container->registerForAutoconfiguration(AbstractApiHandlerFactory::class)
+            ->addTag('skriptmanufaktur.simple_rest.abstract.api_handler_factory')
+            ->addMethodCall('setServices', $abstractApiServices)
+        ;
+
+        $container->registerForAutoconfiguration(AbstractApiControllerFactory::class)
+            ->addTag('skriptmanufaktur.simple_rest.abstract.api_constroller_factory')
+            ->addTag('controller.service_arguments')
+            ->addMethodCall('setServices', $abstractApiServices)
+        ;
+
+        // add voting capabilities, if security is installed
+        if (class_exists(VoterInterface::class)) {
+            $container->setDefinition(
+                GrantingMiddleware::class,
+                (new Definition(GrantingMiddleware::class, [new Reference('security.authorization_checker')]))
+            );
+            $container->setAlias('skriptmanufaktur.simple_rest.voter.granting_middleware', GrantingMiddleware::class);
+
+            $container->setDefinition(
+                RoleService::class,
+                (new Definition(RoleService::class, [new Reference('security.role_hierarchy.roles')]))
+            );
+            $container->setAlias('skriptmanufaktur.simple_rest.voter.role_service', RoleService::class);
+        }
+
+        // add listeners
+        $container->setDefinition(
+            RequestListener::class,
+            (new Definition(RequestListener::class, [new Reference('parameter_bag'), new Reference('request_stack')]))
+                ->addTag('kernel.event_listener', ['event' => 'kernel.request', 'method' => 'onRequestProceed'])
+        );
+        $container->setAlias('skriptmanufaktur.simple_rest.listener.request_params', RequestListener::class);
+
+        $container->setDefinition(
+            ApiResponseListener::class,
+            (new Definition(ApiResponseListener::class))
+                ->addTag('kernel.event_listener', ['event' => 'kernel.exception', 'method' => 'formatException', 'priority' => -10])
+                ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'testApiResponseType', 'priority' => 100])
+                ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'addFlashbagMessages', 'priority' => 90])
+        );
+        $container->setAlias('skriptmanufaktur.simple_rest.listener.api_response', ApiResponseListener::class);
     }
 }

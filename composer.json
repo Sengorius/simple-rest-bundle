@@ -13,13 +13,19 @@
         }
     ],
     "require": {
-        "php": ">=7.4.0",
+        "php": "^7.4|^8.0",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^2.4",
+        "doctrine/orm": "^2.9",
         "symfony/flex": "^1.3.1",
         "symfony/framework-bundle": "*",
+        "symfony/messenger": "*",
+        "symfony/options-resolver": "*",
         "symfony/property-access": "*",
-        "symfony/property-info": "*"
+        "symfony/property-info": "*",
+        "symfony/serializer": "*",
+        "symfony/validator": "*"
     },
     "require-dev": {},
     "config": {
