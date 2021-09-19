@@ -2,11 +2,13 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\DependencyInjection;
 
+use Doctrine\ORM\EntityManager;
 use Exception;
 use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiControllerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiHandlerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiBusWrapper;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiFilterService;
+use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
 use SkriptManufaktur\SimpleRestBundle\Listener\RequestListener;
 use SkriptManufaktur\SimpleRestBundle\Voter\GrantingMiddleware;
@@ -64,6 +66,15 @@ class SkriptManufakturSimpleRestExtension extends Extension
             ->addTag('controller.service_arguments')
             ->addMethodCall('setServices', $abstractApiServices)
         ;
+
+        // add serializer capabilities for Doctrine, if Doctrine is enabled
+        if (class_exists(EntityManager::class)) {
+            $container->setDefinition(
+                EntityUuidDenormalizer::class,
+                (new Definition(EntityUuidDenormalizer::class, [new Reference('doctrine')]))
+            );
+            $container->setAlias('skriptmanufaktur.simple_rest.component.entity_uuid_denormalizer', EntityUuidDenormalizer::class);
+        }
 
         // add voting capabilities, if security is installed
         if (class_exists(VoterInterface::class)) {
