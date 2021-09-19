@@ -2,8 +2,6 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Listener;
 
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 /**
@@ -13,20 +11,17 @@ class RequestListener
 {
     const REQ_SERVER = '_requesting_server';
 
-    private ParameterBagInterface $bag;
-    private RequestStack $requestStack;
+    private string $defaultRequestingServer;
 
 
     /**
      * RequestListener constructor.
      *
-     * @param ParameterBagInterface $bag
-     * @param RequestStack          $requestStack
+     * @param string $defaultRequestingServer
      */
-    public function __construct(ParameterBagInterface $bag, RequestStack $requestStack)
+    public function __construct(string $defaultRequestingServer)
     {
-        $this->requestStack = $requestStack;
-        $this->bag = $bag;
+        $this->defaultRequestingServer = $defaultRequestingServer;
     }
 
     /**
@@ -36,11 +31,10 @@ class RequestListener
      */
     public function onRequestProceed(RequestEvent $event): void
     {
-        $requestingServer = $event->getRequest()->server->get('HTTP_ORIGIN', $this->bag->get('app.domain_url'));
+        $request = $event->getRequest();
+        $requestingServer = $request->server->get('HTTP_ORIGIN', $this->defaultRequestingServer);
         $requestingServer = rtrim($requestingServer, '/');
 
-        if (null !== ($currentRequest = $this->requestStack->getCurrentRequest())) {
-            $currentRequest->attributes->set(self::REQ_SERVER, $requestingServer);
-        }
+        $request->attributes->set(self::REQ_SERVER, $requestingServer);
     }
 }

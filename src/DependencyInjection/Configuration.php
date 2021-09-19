@@ -21,6 +21,19 @@ class Configuration implements ConfigurationInterface
 
         $tree->getRootNode()
             ->children()
+                ->arrayNode('firewall_names')
+                    ->info('The names of all firewalls (security.yaml) that will be used with the simple REST API')
+                    ->beforeNormalization()
+                        ->castToArray()
+                    ->end()
+                    ->isRequired()
+                    ->requiresAtLeastOneElement()
+                    ->scalarPrototype()->end()
+                ->end()
+                ->scalarNode('default_requesting_origin')
+                    ->info('Will be added as "_requesting_server" attribute to request object, if no HTTP_ORIGIN was found')
+                    ->defaultValue('localhost')
+                ->end()
             ->end()
         ;
 

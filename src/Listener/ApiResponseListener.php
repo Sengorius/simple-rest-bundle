@@ -8,6 +8,7 @@ use SkriptManufaktur\SimpleRestBundle\Component\ApiResponse;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiBusException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ValidationException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -22,6 +23,17 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
  */
 class ApiResponseListener
 {
+    private array $firewallNames;
+
+
+    /**
+     * @param string[] $firewallNames
+     */
+    public function __construct(array $firewallNames)
+    {
+        $this->firewallNames = $firewallNames;
+    }
+
     /**
      * The API routes have to return an ApiResponse
      * Throws exception otherwise
@@ -32,14 +44,11 @@ class ApiResponseListener
      */
     public function testApiResponseType(ResponseEvent $event): void
     {
-        $firewall = $event->getRequest()->attributes->get('_firewall_context');
-        $response = $event->getResponse();
-
-        if (1 !== preg_match('/api$/', $firewall)) {
+        if (!$this->belongsToFirewallContext($event->getRequest())) {
             return;
         }
 
-        if ($response instanceof ApiResponse) {
+        if (($response = $event->getResponse()) instanceof ApiResponse) {
             return;
         }
 
@@ -73,10 +82,7 @@ class ApiResponseListener
      */
     public function formatException(ExceptionEvent $event): void
     {
-        $firewall = $event->getRequest()->attributes->get('_firewall_context');
-        $exception = $event->getThrowable();
-
-        if (1 !== preg_match('/api$/', $firewall)) {
+        if (!$this->belongsToFirewallContext($event->getRequest())) {
             return;
         }
 
@@ -88,10 +94,8 @@ class ApiResponseListener
         }
 
         // set default response information
-        $response
-            ->setStatusCode(Response::HTTP_BAD_REQUEST)
-            ->setThrowable($exception)
-        ;
+        $response->setStatusCode(Response::HTTP_BAD_REQUEST);
+        $response->setThrowable($event->getThrowable());
 
         $this->handleExceptionInResponse($response);
         $event->setResponse($response);
@@ -150,5 +154,25 @@ class ApiResponseListener
         foreach ($exception->getViolations() as $violation) {
             $response->addValidationIssue($violation->getPropertyPath(), $violation->getMessage());
         }
+    }
+
+    /**
+     * Matches the given firewall names with the requested one
+     *
+     * @param Request $request
+     *
+     * @return bool
+     */
+    private function belongsToFirewallContext(Request $request): bool
+    {
+        $firewall = $request->attributes->get('_firewall_context');
+
+        foreach ($this->firewallNames as $fn) {
+            if (1 === preg_match('/'.$fn.'$/', $firewall)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -83,14 +83,14 @@ class SkriptManufakturSimpleRestExtension extends Extension
         // add listeners
         $container->setDefinition(
             RequestListener::class,
-            (new Definition(RequestListener::class, [new Reference('parameter_bag'), new Reference('request_stack')]))
+            (new Definition(RequestListener::class, [$configuration['default_requesting_origin']]))
                 ->addTag('kernel.event_listener', ['event' => 'kernel.request', 'method' => 'onRequestProceed'])
         );
         $container->setAlias('skriptmanufaktur.simple_rest.listener.request_params', RequestListener::class);
 
         $container->setDefinition(
             ApiResponseListener::class,
-            (new Definition(ApiResponseListener::class))
+            (new Definition(ApiResponseListener::class, [$configuration['firewall_names']]))
                 ->addTag('kernel.event_listener', ['event' => 'kernel.exception', 'method' => 'formatException', 'priority' => -10])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'testApiResponseType', 'priority' => 100])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'addFlashbagMessages', 'priority' => 90])
