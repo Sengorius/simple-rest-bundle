@@ -29,7 +29,7 @@ class ApiFilterService
 
         if (!$ref->implementsInterface(ApiFilterInterface::class)) {
             throw new ApiProcessException(sprintf(
-                'Die Klasse "%s" hat kein Interface %s implementiert und kann daher nicht für das Filtern genutzt werden!',
+                'Class "%s" does not implement interface %s and can therefore not be used as a filter!',
                 $filterInterface,
                 ApiFilterInterface::class
             ));

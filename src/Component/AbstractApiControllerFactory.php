@@ -23,15 +23,16 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
     protected function unpackRequestContent(Request $request): array
     {
         $content = $request->getContent();
+        $method = strtoupper($request->getMethod());
 
-        if (in_array($request->getMethod(), ['POST', 'PUT', 'PATCH']) && empty($content)) {
-            throw new ApiProcessException(sprintf('Http Methode ist %s, der Request hat jedoch keinen Inhalt!', $request->getMethod()));
+        if (in_array($method, ['POST', 'PUT', 'PATCH']) && empty($content)) {
+            throw new ApiProcessException(sprintf('HTTP method is %s, but the request is empty!', $method));
         }
 
         $content = json_decode($content, true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            throw new ApiProcessException(sprintf('Fehler beim Auspacken des JSON: "%s"', json_last_error_msg()));
+            throw new ApiProcessException(sprintf('Error while unpacking JSON: "%s"', json_last_error_msg()));
         }
 
         return $content;

@@ -40,7 +40,7 @@ class GrantingMiddleware implements MiddlewareInterface
         /** @var GrantingStamp $stamp */
         foreach ($stamps as $stamp) {
             if (!$this->authChecker->isGranted($stamp->getAttribute(), $message)) {
-                throw new AccessDeniedException('Zugriff verweigert!');
+                throw new AccessDeniedException();
             }
         }
 
