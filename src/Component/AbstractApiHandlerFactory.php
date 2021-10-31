@@ -5,6 +5,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -74,6 +75,7 @@ abstract class AbstractApiHandlerFactory
         $context = [
             AbstractNormalizer::GROUPS => $groups,
             AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false,
+            AbstractObjectNormalizer::DEEP_OBJECT_TO_POPULATE => true,
         ];
 
         if (null !== $populated) {
