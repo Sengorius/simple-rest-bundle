@@ -72,6 +72,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
             $container->setDefinition(
                 EntityUuidDenormalizer::class,
                 (new Definition(EntityUuidDenormalizer::class, [new Reference('doctrine')]))
+                    ->addTag('serializer.normalizer')
             );
             $container->setAlias('skriptmanufaktur.simple_rest.component.entity_uuid_denormalizer', EntityUuidDenormalizer::class);
         }
