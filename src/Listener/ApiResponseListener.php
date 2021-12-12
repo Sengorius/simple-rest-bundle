@@ -123,6 +123,7 @@ class ApiResponseListener
 
             case $exception instanceof ValidationException:
                 $response->setThrowable(null);
+                $response->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
                 $this->fetchValidationException($response, $exception);
                 break;
 
