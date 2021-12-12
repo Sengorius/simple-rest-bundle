@@ -221,7 +221,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
                     break;
 
                 case self::FILTER_WORD_START:
-                    $statement = sprintf('%1$s LIKE CONCAT(:%2$s, \'%%\') OR %s LIKE CONCAT(\'%% \', :%1$s, \'%%\')', $varName, $parameterName);
+                    $statement = sprintf('%1$s LIKE CONCAT(:%2$s, \'%%\') OR %1$s LIKE CONCAT(\'%% \', :%2$s, \'%%\')', $varName, $parameterName);
                     break;
 
                 default:
