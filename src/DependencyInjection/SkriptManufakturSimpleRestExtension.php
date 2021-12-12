@@ -8,6 +8,7 @@ use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiControllerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiHandlerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiBusWrapper;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiFilterService;
+use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
 use SkriptManufaktur\SimpleRestBundle\Listener\RequestListener;
@@ -69,6 +70,13 @@ class SkriptManufakturSimpleRestExtension extends Extension
 
         // add serializer capabilities for Doctrine, if Doctrine is enabled
         if (class_exists(EntityManager::class)) {
+            $container->setDefinition(
+                EntityIdDenormalizer::class,
+                (new Definition(EntityIdDenormalizer::class, [new Reference('doctrine')]))
+                    ->addTag('serializer.normalizer')
+            );
+            $container->setAlias('skriptmanufaktur.simple_rest.component.entity_id_denormalizer', EntityIdDenormalizer::class);
+
             $container->setDefinition(
                 EntityUuidDenormalizer::class,
                 (new Definition(EntityUuidDenormalizer::class, [new Reference('doctrine')]))

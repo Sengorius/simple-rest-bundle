@@ -83,6 +83,7 @@ abstract class AbstractApiHandlerFactory
         }
 
         if (!empty($entityClassMap)) {
+            $context[EntityIdDenormalizer::CLASS_MAP] = $entityClassMap;
             $context[EntityUuidDenormalizer::CLASS_MAP] = $entityClassMap;
         }
 
