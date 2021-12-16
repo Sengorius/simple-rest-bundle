@@ -76,7 +76,7 @@ class Pagination extends AbstractPagination
         // calc stats by remaining items
         $this->items = $items;
         $this->itemCount = count($items);
-        $this->maxPages = (int) ceil($this->itemCount / $this->itemsPerPage) - 1;
+        $this->maxPages = (int) ceil($this->itemCount / $this->itemsPerPage);
         $this->isEmpty = 0 === $this->itemCount;
 
         // set this pagination as booted
@@ -176,21 +176,37 @@ class Pagination extends AbstractPagination
 
     public function getItemCount(): int
     {
+        if (null === $this->itemCount) {
+            throw new PaginationException('Pagination was not booted, yet.');
+        }
+
         return $this->itemCount;
     }
 
     public function getItemsPerPage(): int
     {
+        if (null === $this->itemsPerPage) {
+            throw new PaginationException('Pagination was not booted, yet.');
+        }
+
         return $this->itemsPerPage;
     }
 
     public function getMaxPages(): int
     {
+        if (null === $this->maxPages) {
+            throw new PaginationException('Pagination was not booted, yet.');
+        }
+
         return $this->maxPages;
     }
 
     public function getItemClass(): ?string
     {
+        if (null === $this->itemClass) {
+            throw new PaginationException('Pagination was not booted, yet.');
+        }
+
         return $this->itemClass;
     }
 
@@ -286,7 +302,7 @@ class Pagination extends AbstractPagination
     protected function definePage(): void
     {
         $this->isFirstPage = 0 === $this->currentPage;
-        $this->isLastPage = $this->maxPages === $this->currentPage;
+        $this->isLastPage = ($this->maxPages - 1) === $this->currentPage; // as the current page starts with 0
     }
 
     /**

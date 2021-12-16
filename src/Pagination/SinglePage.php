@@ -18,15 +18,14 @@ class SinglePage extends Pagination
      * SinglePage constructor.
      *
      * @param array $items
-     * @param int   $perPage
      * @param int   $page
      * @param int   $maxItems
      *
      * @throws PaginationException
      */
-    public function __construct(array $items, int $perPage, int $page, int $maxItems)
+    public function __construct(array $items, int $page, int $maxItems)
     {
-        parent::__construct($items, $perPage);
+        parent::__construct($items, count($items));
 
         $this->maxItems = $maxItems;
         $this->currentPage = $page;
@@ -36,19 +35,18 @@ class SinglePage extends Pagination
      * SinglePage constructor from Doctrine Paginator
      *
      * @param Paginator $paginator
-     * @param int       $perPage
      * @param int       $page
      *
      * @return SinglePage
      *
      * @throws Exception|PaginationException
      */
-    public static function fromDoctrinePaginator(Paginator $paginator, int $perPage, int $page): SinglePage
+    public static function fromDoctrinePaginator(Paginator $paginator, int $page): SinglePage
     {
         $items = iterator_to_array($paginator->getIterator());
         $maxItems = $paginator->count();
 
-        return new self($items, $perPage, $page, $maxItems);
+        return new self($items, $page, $maxItems);
     }
 
     /**
@@ -68,7 +66,7 @@ class SinglePage extends Pagination
         $actualItemCount = count($items);
         $this->items = $items;
         $this->itemCount = $this->maxItems - $filteredItems;
-        $this->maxPages = (int) ceil($this->itemCount / $this->itemsPerPage) - 1;
+        $this->maxPages = (int) ceil($this->itemCount / $this->itemsPerPage);
         $this->isEmpty = 0 === $actualItemCount;
 
         // calculate more stats
