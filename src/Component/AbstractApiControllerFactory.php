@@ -120,6 +120,7 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
             'lowerBound' => $pagination->getLowerBound(),
             'upperBound' => $pagination->getUpperBound(),
             'isSatisfied' => $pagination->isSatisfied(),
+            'isEmpty' => $pagination->isEmpty(),
             'isFirstPage' => $pagination->isFirstPage(),
             'isLastPage' => $pagination->isLastPage(),
             'items' => $this->normalizeCollection($pagination->getPage(), $groups),
