@@ -18,14 +18,15 @@ class SinglePage extends Pagination
      * SinglePage constructor.
      *
      * @param array $items
+     * @param int   $perPage
      * @param int   $page
      * @param int   $maxItems
      *
      * @throws PaginationException
      */
-    public function __construct(array $items, int $page, int $maxItems)
+    public function __construct(array $items, int $perPage, int $page, int $maxItems)
     {
-        parent::__construct($items, count($items));
+        parent::__construct($items, $perPage);
 
         $this->maxItems = $maxItems;
         $this->currentPage = $page;
@@ -35,18 +36,19 @@ class SinglePage extends Pagination
      * SinglePage constructor from Doctrine Paginator
      *
      * @param Paginator $paginator
+     * @param int       $perPage
      * @param int       $page
      *
      * @return SinglePage
      *
      * @throws Exception|PaginationException
      */
-    public static function fromDoctrinePaginator(Paginator $paginator, int $page): SinglePage
+    public static function fromDoctrinePaginator(Paginator $paginator, int $perPage, int $page): SinglePage
     {
         $items = iterator_to_array($paginator->getIterator());
         $maxItems = $paginator->count();
 
-        return new self($items, $page, $maxItems);
+        return new self($items, $perPage, $page, $maxItems);
     }
 
     /**
