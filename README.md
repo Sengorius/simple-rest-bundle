@@ -1,29 +1,19 @@
 Skript-Manufaktur -- Simple REST Bundle
 =======================================
 
-This is a Symfony bundle is that introduces helpers for a REST API. It is optimized to use the `symfony/messenger`
-component internally.
+This Symfony bundle introduces helpers for a REST API. It is optimized to use the `symfony/messenger` component
+internally.
 
 
 ## Installation
 
-Open your projects `composer.json` file and add the repository:
+This package is available on Packagist and should be installed using [Composer](https://getcomposer.org/):
 
-```json
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Sengorius/simple-rest-bundle.git"
-        }
-    ]
-}
+```shell
+composer require skript-manufaktur/simple-rest-bundle
 ```
 
-Then add the component via composer with `composer req skript-manufaktur/simple-rest-bundle`.
-
-As this bundle uses the `symfony/flex` mechanics, your `config/bundles.php` should already contain a new line,
-otherwise open the file and add:
+If you don't use Symfony Flex, you must enable the bundle manually in the application:
 
 ```php
 return [
@@ -31,3 +21,9 @@ return [
     SkriptManufaktur\SimpleRestBundle\SkriptManufakturSimpleRestBundle::class => ['all' => true],
 ];
 ```
+
+
+## Documentation
+
+The documentation for this bundle will be maintained in the GitHub pages:
+https://sengorius.github.io/repositories/simple-rest/index.html
