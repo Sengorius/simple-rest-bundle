@@ -8,6 +8,7 @@ use SkriptManufaktur\SimpleRestBundle\Component\ApiResponse;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiBusException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ValidationException;
+use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -62,16 +63,24 @@ class ApiResponseListener
      */
     public function addFlashbagMessages(ResponseEvent $event): void
     {
+        if (!$this->belongsToFirewallContext($event->getRequest())) {
+            return;
+        }
+
         /** @var ApiResponse $response */
         if (!($response = $event->getResponse()) instanceof ApiResponse) {
             return;
         }
 
-        /** @var Session $session */
-        $session = $event->getRequest()->getSession();
+        try {
+            /** @var Session $session */
+            $session = $event->getRequest()->getSession();
 
-        foreach ($session->getFlashBag()->all() as $type => $messages) {
-            $response->mergeMessages($type, $messages);
+            foreach ($session->getFlashBag()->all() as $type => $messages) {
+                $response->mergeMessages($type, $messages);
+            }
+        } catch (SessionNotFoundException $e) {
+            // just catch and throw away
         }
     }
 
