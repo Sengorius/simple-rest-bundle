@@ -17,6 +17,7 @@ use SkriptManufaktur\SimpleRestBundle\Voter\RoleService;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
@@ -95,7 +96,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
 
             $container->setDefinition(
                 RoleService::class,
-                (new Definition(RoleService::class, [new Reference('security.role_hierarchy.roles')]))
+                (new Definition(RoleService::class, [new Parameter('security.role_hierarchy.roles')]))
             );
             $container->setAlias('skriptmanufaktur.simple_rest.voter.role_service', RoleService::class);
         }
