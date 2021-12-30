@@ -124,9 +124,9 @@ class EntityUuidDenormalizer implements ContextAwareDenormalizerInterface, Denor
     /**
      * @param mixed $data
      *
-     * @return int|null
+     * @return string|null
      */
-    private function getUuidFromData($data): ?int
+    private function getUuidFromData($data): ?string
     {
         if ($this->isDataAnUuid($data)) {
             return $data;
