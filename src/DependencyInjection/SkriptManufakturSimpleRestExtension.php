@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
 /**
  * Class SkriptManufakturSimpleRestExtension
@@ -86,7 +86,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
         }
 
         // add voting capabilities, if security is installed
-        if (class_exists(VoterInterface::class)) {
+        if (class_exists(AuthorizationChecker::class)) {
             $container->setDefinition(
                 GrantingMiddleware::class,
                 (new Definition(GrantingMiddleware::class, [new Reference('security.authorization_checker')]))
