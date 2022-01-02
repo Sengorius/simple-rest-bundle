@@ -53,7 +53,7 @@ class EntityUuidDenormalizer implements ContextAwareDenormalizerInterface, Denor
      *
      * @return bool
      */
-    public function supportsDenormalization($data, string $type, ?string $format = null, array $context = []): bool
+    public function supportsDenormalization($data, $type, $format = null, array $context = []): bool
     {
         $entityClasses = isset($context[self::CLASS_MAP]) ? array_keys($context[self::CLASS_MAP]) : [];
         $matchesClass = in_array($type, $entityClasses);
@@ -75,7 +75,7 @@ class EntityUuidDenormalizer implements ContextAwareDenormalizerInterface, Denor
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize($data, string $type, string $format = null, array $context = []): object
+    public function denormalize($data, $type, $format = null, array $context = []): object
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getUuidFromData($data);
