@@ -4,13 +4,9 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Throwable;
 
 if (PHP_VERSION_ID >= 80000) {
-    /**
-     * Class ApiResponse
-     */
     class ApiResponse extends JsonResponse
     {
         const MSGTYPE_SUCCESS = 'success';
@@ -25,23 +21,15 @@ if (PHP_VERSION_ID >= 80000) {
         ];
         const VALID_ROOT = 'root';
 
-        private array $apiData;
+        private array $apiData = [];
         private array $apiMessages = self::EMPTY_MESSAGES;
         private array $validation = [];
         private Throwable|null $throwable = null;
 
 
-        /**
-         * ApiResponse constructor.
-         *
-         * @param array $data
-         * @param int   $status
-         * @param array $headers
-         */
         public function __construct(array $data = [], int $status = 200, array $headers = [])
         {
-            parent::__construct([], $status, $headers, false);
-            $this->setData($data);
+            parent::__construct('', $status, $headers, true);
 
             // add security headers; see https://observatory.mozilla.org/
             $this->headers->set('Content-Security-Policy', "frame-ancestors 'none'");
@@ -55,6 +43,8 @@ if (PHP_VERSION_ID >= 80000) {
             $this->headers->addCacheControlDirective('must-revalidate');
             $this->headers->set('Expires', '0');
             $this->headers->set('Pragma', 'no-cache');
+
+            $this->setData($data);
         }
 
         /**
@@ -71,32 +61,6 @@ if (PHP_VERSION_ID >= 80000) {
             return new static($data, $status, $headers);
         }
 
-        /**
-         * Assemble a json construction before preparing
-         *
-         * @param Request $request
-         *
-         * @return static
-         */
-        public function prepare(Request $request): static
-        {
-            if (null !== $this->throwable) {
-                $this->apiData = [
-                    'message' => $this->throwable->getMessage(),
-                    'status' => method_exists($this->throwable, 'getStatusCode') ? $this->throwable->getStatusCode() : 0,
-                    'code' => $this->throwable->getCode(),
-                ];
-            }
-
-            parent::setData([
-                'data' => $this->apiData,
-                'messages' => $this->apiMessages,
-                'validation' => $this->validation,
-            ]);
-
-            return parent::prepare($request);
-        }
-
         public function getData(): array
         {
             return $this->apiData;
@@ -109,6 +73,7 @@ if (PHP_VERSION_ID >= 80000) {
             }
 
             $this->apiData = $data;
+            $this->updateApiData();
 
             return $this;
         }
@@ -126,6 +91,7 @@ if (PHP_VERSION_ID >= 80000) {
         {
             if (array_key_exists($type, $this->apiMessages)) {
                 $this->apiMessages[$type][] = $message;
+                $this->updateApiData();
             }
 
             return $this;
@@ -135,6 +101,7 @@ if (PHP_VERSION_ID >= 80000) {
         {
             if (array_key_exists($type, $this->apiMessages)) {
                 $this->apiMessages[$type] = array_merge($this->apiMessages[$type], $messages);
+                $this->updateApiData();
             }
 
             return $this;
@@ -147,6 +114,8 @@ if (PHP_VERSION_ID >= 80000) {
             } else {
                 $this->apiMessages = self::EMPTY_MESSAGES;
             }
+
+            $this->updateApiData();
 
             return $this;
         }
@@ -162,6 +131,7 @@ if (PHP_VERSION_ID >= 80000) {
             }
 
             $this->validation[$component][] = $message;
+            $this->updateApiData();
 
             return $this;
         }
@@ -177,6 +147,7 @@ if (PHP_VERSION_ID >= 80000) {
             }
 
             $this->validation[$component] = array_merge($this->validation[$component], $messages);
+            $this->updateApiData();
 
             return $this;
         }
@@ -189,6 +160,8 @@ if (PHP_VERSION_ID >= 80000) {
                 $this->validation = [];
             }
 
+            $this->updateApiData();
+
             return $this;
         }
 
@@ -200,14 +173,31 @@ if (PHP_VERSION_ID >= 80000) {
         public function setThrowable(?Throwable $throwable): static
         {
             $this->throwable = $throwable;
+            $this->updateApiData();
+
+            return $this;
+        }
+
+        protected function updateApiData(): static
+        {
+            if (null !== $this->throwable) {
+                $this->apiData = [
+                    'message' => $this->throwable->getMessage(),
+                    'status' => method_exists($this->throwable, 'getStatusCode') ? $this->throwable->getStatusCode() : 0,
+                    'code' => $this->throwable->getCode(),
+                ];
+            }
+
+            parent::setData([
+                'data' => $this->apiData,
+                'messages' => $this->apiMessages,
+                'validation' => $this->validation,
+            ]);
 
             return $this;
         }
     }
 } else {
-    /**
-     * Class ApiResponse
-     */
     class ApiResponse extends JsonResponse
     {
         const MSGTYPE_SUCCESS = 'success';
@@ -222,23 +212,15 @@ if (PHP_VERSION_ID >= 80000) {
         ];
         const VALID_ROOT = 'root';
 
-        private array $apiData;
+        private array $apiData = [];
         private array $apiMessages = self::EMPTY_MESSAGES;
         private array $validation = [];
         private ?Throwable $throwable = null;
 
 
-        /**
-         * ApiResponse constructor.
-         *
-         * @param array|null $data
-         * @param int        $status
-         * @param array      $headers
-         */
         public function __construct(?array $data = null, int $status = 200, array $headers = [])
         {
-            parent::__construct([], $status, $headers, false);
-            $this->apiData = $data ?? [];
+            parent::__construct('', $status, $headers, true);
 
             // add security headers; see https://observatory.mozilla.org/
             $this->headers->set('Content-Security-Policy', "frame-ancestors 'none'");
@@ -252,6 +234,8 @@ if (PHP_VERSION_ID >= 80000) {
             $this->headers->addCacheControlDirective('must-revalidate');
             $this->headers->set('Expires', '0');
             $this->headers->set('Pragma', 'no-cache');
+
+            $this->setData($data ?? []);
         }
 
         /**
@@ -268,32 +252,6 @@ if (PHP_VERSION_ID >= 80000) {
             return new static($data, $status, $headers);
         }
 
-        /**
-         * Assemble a json construction before preparing
-         *
-         * @param Request $request
-         *
-         * @return ApiResponse
-         */
-        public function prepare(Request $request): JsonResponse
-        {
-            if (null !== $this->throwable) {
-                $this->apiData = [
-                    'message' => $this->throwable->getMessage(),
-                    'status' => method_exists($this->throwable, 'getStatusCode') ? $this->throwable->getStatusCode() : 0,
-                    'code' => $this->throwable->getCode(),
-                ];
-            }
-
-            parent::setData([
-                'data' => $this->apiData,
-                'messages' => $this->apiMessages,
-                'validation' => $this->validation,
-            ]);
-
-            return parent::prepare($request);
-        }
-
         public function getData(): array
         {
             return $this->apiData;
@@ -302,6 +260,7 @@ if (PHP_VERSION_ID >= 80000) {
         public function setData($data = []): self
         {
             $this->apiData = $data;
+            $this->updateApiData();
 
             return $this;
         }
@@ -319,6 +278,7 @@ if (PHP_VERSION_ID >= 80000) {
         {
             if (array_key_exists($type, $this->apiMessages)) {
                 $this->apiMessages[$type][] = $message;
+                $this->updateApiData();
             }
 
             return $this;
@@ -328,6 +288,7 @@ if (PHP_VERSION_ID >= 80000) {
         {
             if (array_key_exists($type, $this->apiMessages)) {
                 $this->apiMessages[$type] = array_merge($this->apiMessages[$type], $messages);
+                $this->updateApiData();
             }
 
             return $this;
@@ -340,6 +301,8 @@ if (PHP_VERSION_ID >= 80000) {
             } else {
                 $this->apiMessages = self::EMPTY_MESSAGES;
             }
+
+            $this->updateApiData();
 
             return $this;
         }
@@ -355,6 +318,7 @@ if (PHP_VERSION_ID >= 80000) {
             }
 
             $this->validation[$component][] = $message;
+            $this->updateApiData();
 
             return $this;
         }
@@ -370,6 +334,7 @@ if (PHP_VERSION_ID >= 80000) {
             }
 
             $this->validation[$component] = array_merge($this->validation[$component], $messages);
+            $this->updateApiData();
 
             return $this;
         }
@@ -382,6 +347,8 @@ if (PHP_VERSION_ID >= 80000) {
                 $this->validation = [];
             }
 
+            $this->updateApiData();
+
             return $this;
         }
 
@@ -393,6 +360,26 @@ if (PHP_VERSION_ID >= 80000) {
         public function setThrowable(?Throwable $throwable): self
         {
             $this->throwable = $throwable;
+            $this->updateApiData();
+
+            return $this;
+        }
+
+        protected function updateApiData(): self
+        {
+            if (null !== $this->throwable) {
+                $this->apiData = [
+                    'message' => $this->throwable->getMessage(),
+                    'status' => method_exists($this->throwable, 'getStatusCode') ? $this->throwable->getStatusCode() : 0,
+                    'code' => $this->throwable->getCode(),
+                ];
+            }
+
+            parent::setData([
+                'data' => $this->apiData,
+                'messages' => $this->apiMessages,
+                'validation' => $this->validation,
+            ]);
 
             return $this;
         }
