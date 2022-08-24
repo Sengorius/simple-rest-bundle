@@ -8,25 +8,15 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Role\RoleHierarchy;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class RoleService
- */
 class RoleService extends RoleHierarchy
 {
     const STRATEGY_AND = 'and';
     const STRATEGY_OR = 'or';
 
-    /**
-     * @var string[]|null
-     */
+    /** @var string[]|null */
     private ?array $flatRoles = null;
 
 
-    /**
-     * RoleService constructor.
-     *
-     * @param array $hierarchy
-     */
     public function __construct(array $hierarchy)
     {
         parent::__construct($hierarchy);
