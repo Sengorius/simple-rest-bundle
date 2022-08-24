@@ -7,17 +7,17 @@ use Exception;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
+class LegacyEntityIdDenormalizer implements ContextAwareDenormalizerInterface, DenormalizerAwareInterface
 {
     use EntityDenormalizerTrait;
 
-    const UUID_REGEX = '#\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b#';
-    const CLASS_MAP = 'entity_uuid_denormalize_class_map';
-    const PREVENT = 'entity_uuid_denormalize_prevent_recursion';
-    const KEY = 'uuid';
+    const CLASS_MAP = 'entity_id_denormalize_class_map';
+    const PREVENT = 'entity_id_denormalize_prevent_recursion';
+    const KEY = 'id';
 
     private ManagerRegistry $registry;
     private DenormalizerInterface $denormalizer;
@@ -49,11 +49,11 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
         $matchesClass = in_array($type, $entityClasses);
         $preventRecursion = isset($context[self::PREVENT]) && true === $context[self::PREVENT];
 
-        return $matchesClass && !$preventRecursion && ($this->isDataAnUuid($data) || $this->isDataAnArray($data));
+        return $matchesClass && !$preventRecursion && ($this->isDataAnInteger($data) || $this->isDataAnArray($data));
     }
 
     /**
-     * Denormalizes UUID back into an object of the given class.
+     * Denormalizes an ID back into an object of the given class.
      *
      * @param mixed       $data    Data to restore
      * @param string      $type    The expected class to instantiate
@@ -68,7 +68,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
     public function denormalize($data, $type, $format = null, array $context = []): object
     {
         $repository = $this->getRepository($type);
-        $entityId = $this->getUuidFromData($data);
+        $entityId = $this->getIdFromData($data);
         $hydratingMethod = $context[self::CLASS_MAP][$type] ?? 'find';
 
         try {
@@ -85,7 +85,11 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
 
             return $result;
         } catch (Exception $e) {
-            throw new UnexpectedValueException(sprintf('Trying to call $em->%s(%s) failed!', $hydratingMethod, $data), 0, $e);
+            throw new UnexpectedValueException(
+                sprintf('Trying to call %s::%s(%s) failed!', get_class($repository), $hydratingMethod, $entityId),
+                0,
+                $e
+            );
         }
     }
 
@@ -94,9 +98,9 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      *
      * @return bool
      */
-    private function isDataAnUuid($data): bool
+    private function isDataAnInteger($data): bool
     {
-        return is_string($data) && 1 === preg_match(self::UUID_REGEX, $data);
+        return is_int($data) && ((int) $data > 0);
     }
 
     /**
@@ -108,17 +112,17 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
     {
         $isArrayHasId = is_array($data) && array_key_exists(self::KEY, $data);
 
-        return $isArrayHasId && (is_null($data[self::KEY]) || $this->isDataAnUuid($data[self::KEY]));
+        return $isArrayHasId && (is_null($data[self::KEY]) || $this->isDataAnInteger($data[self::KEY]));
     }
 
     /**
      * @param mixed $data
      *
-     * @return string|null
+     * @return int|null
      */
-    private function getUuidFromData($data): ?string
+    private function getIdFromData($data): ?int
     {
-        if ($this->isDataAnUuid($data)) {
+        if ($this->isDataAnInteger($data)) {
             return $data;
         }
 

@@ -7,14 +7,10 @@ use Exception;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-/**
- * Class EntityIdDenormalizer
- */
-class EntityIdDenormalizer implements ContextAwareDenormalizerInterface, DenormalizerAwareInterface
+class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
 {
     use EntityDenormalizerTrait;
 
@@ -26,17 +22,11 @@ class EntityIdDenormalizer implements ContextAwareDenormalizerInterface, Denorma
     private DenormalizerInterface $denormalizer;
 
 
-    /**
-     * EntityIdDenormalizer constructor.
-     */
     public function __construct(ManagerRegistry $registry)
     {
         $this->registry = $registry;
     }
 
-    /**
-     * Sets the owning Denormalizer object.
-     */
     public function setDenormalizer(DenormalizerInterface $denormalizer)
     {
         $this->denormalizer = $denormalizer;

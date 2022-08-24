@@ -7,10 +7,11 @@ use Exception;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
+class LegacyEntityUuidDenormalizer implements ContextAwareDenormalizerInterface, DenormalizerAwareInterface
 {
     use EntityDenormalizerTrait;
 

@@ -6,9 +6,6 @@ use Doctrine\Persistence\ObjectRepository;
 use Exception;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
-/**
- * Trait EntityDenormalizerTrait
- */
 trait EntityDenormalizerTrait
 {
     private array $repositories;
