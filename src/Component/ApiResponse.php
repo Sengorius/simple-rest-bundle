@@ -66,7 +66,7 @@ if (PHP_VERSION_ID >= 80000) {
          *
          * @return static
          */
-        public static function create(array $data = [], int $status = 200, array $headers = []): static
+        public static function create($data = [], int $status = 200, array $headers = []): static
         {
             return new static($data, $status, $headers);
         }
