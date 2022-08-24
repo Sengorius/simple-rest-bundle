@@ -26,7 +26,8 @@
         "symfony/validator": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "symfony/security-core": "^6.0"
     },
     "config": {
         "sort-packages": true
