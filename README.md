@@ -27,3 +27,9 @@ return [
 
 The documentation for this bundle will be maintained in the GitHub pages:
 https://sengorius.github.io/repositories/simple-rest/index.html
+
+
+## Tests
+
+Like to validate the tests or check coding standards? Clone the repository, run `composer install` and 
+`composer check-bundle` or take a look at the `composer.json` to run single code checks.

@@ -26,7 +26,10 @@
         "symfony/validator": "*"
     },
     "require-dev": {
+        "escapestudios/symfony2-coding-standard": "^3.12",
+        "phpstan/phpstan-symfony": "^1.2",
         "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.7",
         "symfony/security-core": "^6.0"
     },
     "config": {
@@ -41,5 +44,18 @@
         "psr-4": {
             "SkriptManufaktur\\SimpleRestBundle\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "check-bundle": [
+            "@phpcs-check",
+            "@phpstan-check",
+            "@phpunit-check"
+        ],
+        "phpcs-check": [
+            "php vendor/bin/phpcs --config-set installed_paths vendor/escapestudios/symfony2-coding-standard",
+            "php vendor/bin/phpcs"
+        ],
+        "phpunit-check": "php vendor/bin/phpunit",
+        "phpstan-check": "php vendor/bin/phpstan analyse --level 5 src"
     }
 }
