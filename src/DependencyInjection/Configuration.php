@@ -34,6 +34,10 @@ class Configuration implements ConfigurationInterface
                     ->info('Will be added as "_requesting_server" attribute to request object, if no HTTP_ORIGIN was found')
                     ->defaultValue('localhost')
                 ->end()
+                ->booleanNode('granting_middleware_throws')
+                    ->info('Shall the middleware throw exceptions or just add grants to the stamps?')
+                    ->defaultTrue()
+                ->end()
             ->end()
         ;
 

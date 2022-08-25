@@ -101,7 +101,10 @@ class SkriptManufakturSimpleRestExtension extends Extension
         if (class_exists(AuthorizationChecker::class)) {
             $container->setDefinition(
                 GrantingMiddleware::class,
-                (new Definition(GrantingMiddleware::class, [new Reference('security.authorization_checker')]))
+                (new Definition(GrantingMiddleware::class, [
+                    new Reference('security.authorization_checker'),
+                    $configuration['granting_middleware_throws'],
+                ]))
             );
             $container->setAlias('skriptmanufaktur.simple_rest.voter.granting_middleware', GrantingMiddleware::class);
 
