@@ -36,7 +36,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
         $authChecker->expects($this->once())
             ->method('isGranted')
-                ->with($stamp->getAttribute(), $envelope->withoutAll(GrantingStamp::class))
+                ->with($stamp->getAttribute(), [$envelope->withoutAll(GrantingStamp::class), $stamp])
                 ->willReturn(true)
         ;
 
@@ -59,7 +59,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
         $authChecker->expects($this->once())
             ->method('isGranted')
-                ->with($stamp->getAttribute(), $envelope->withoutAll(GrantingStamp::class))
+                ->with($stamp->getAttribute(), [$envelope->withoutAll(GrantingStamp::class), $stamp])
                 ->willReturn(false)
         ;
 
@@ -75,7 +75,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
         $authChecker->expects($this->once())
             ->method('isGranted')
-                ->with($stamp->getAttribute(), $envelope->withoutAll(AfterHandleGrantingStamp::class))
+                ->with($stamp->getAttribute(), [$envelope->withoutAll(AfterHandleGrantingStamp::class), $stamp])
                 ->willReturn(true)
         ;
 
@@ -98,7 +98,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
         $authChecker->expects($this->once())
             ->method('isGranted')
-                ->with($stamp->getAttribute(), $envelope->withoutAll(AfterHandleGrantingStamp::class))
+                ->with($stamp->getAttribute(), [$envelope->withoutAll(AfterHandleGrantingStamp::class), $stamp])
                 ->willReturn(false)
         ;
 
@@ -116,7 +116,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
         $authChecker->expects($this->atLeast(3))
             ->method('isGranted')
-            ->willReturnCallback(fn (string $attr, Envelope $env) => 'test_3' !== $attr)
+            ->willReturnCallback(fn (string $attr, array $a) => 'test_3' !== $attr)
         ;
 
         static::assertNull($stamp1->getVote());

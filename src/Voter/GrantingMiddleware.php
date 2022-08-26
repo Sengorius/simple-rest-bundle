@@ -23,7 +23,7 @@ class GrantingMiddleware implements MiddlewareInterface
 
         /** @var GrantingStamp $stamp */
         foreach ($stamps as $stamp) {
-            $vote = $this->authChecker->isGranted($stamp->getAttribute(), $envelope);
+            $vote = $this->authChecker->isGranted($stamp->getAttribute(), [$envelope, $stamp]);
             $envelope = $envelope->with(new GrantingStamp($stamp->getAttribute(), $vote));
             $majorVote = $majorVote && $vote;
         }
@@ -42,7 +42,7 @@ class GrantingMiddleware implements MiddlewareInterface
 
         /** @var AfterHandleGrantingStamp $stamp */
         foreach ($afterStamps as $stamp) {
-            $vote = $this->authChecker->isGranted($stamp->getAttribute(), $nextEnvelope);
+            $vote = $this->authChecker->isGranted($stamp->getAttribute(), [$nextEnvelope, $stamp]);
             $nextEnvelope = $nextEnvelope->with(new AfterHandleGrantingStamp($stamp->getAttribute(), $vote));
             $majorVote = $majorVote && $vote;
         }

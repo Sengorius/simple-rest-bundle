@@ -4,7 +4,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Voter;
 
 use Symfony\Component\Messenger\Stamp\NonSendableStampInterface;
 
-class GrantingStamp implements NonSendableStampInterface
+class GrantingStamp implements NonSendableStampInterface, GrantingStampInterface
 {
     public function __construct(private readonly string $attribute, private readonly bool|null $vote = null)
     {
