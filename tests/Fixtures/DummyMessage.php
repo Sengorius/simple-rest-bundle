@@ -4,12 +4,8 @@ namespace SkriptManufaktur\SimpleRestBundle\Tests\Fixtures;
 
 class DummyMessage
 {
-    private string $message;
-
-
-    public function __construct(string $message)
+    public function __construct(private readonly string $message)
     {
-        $this->message = $message;
     }
 
     public function getMessage(): string

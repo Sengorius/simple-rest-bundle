@@ -18,13 +18,11 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
     const PREVENT = 'entity_id_denormalize_prevent_recursion';
     const KEY = 'id';
 
-    private ManagerRegistry $registry;
     private DenormalizerInterface $denormalizer;
 
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(private readonly ManagerRegistry $registry)
     {
-        $this->registry = $registry;
     }
 
     public function setDenormalizer(DenormalizerInterface $denormalizer)
@@ -42,7 +40,7 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
      *
      * @return bool
      */
-    public function supportsDenormalization($data, $type, $format = null, array $context = []): bool
+    public function supportsDenormalization(mixed $data, string $type, $format = null, array $context = []): bool
     {
         $entityClasses = isset($context[self::CLASS_MAP]) ? array_keys($context[self::CLASS_MAP]) : [];
         $matchesClass = in_array($type, $entityClasses);
@@ -64,7 +62,7 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize($data, $type, $format = null, array $context = []): object
+    public function denormalize(mixed $data, string $type, $format = null, array $context = []): object
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getIdFromData($data);
@@ -92,34 +90,19 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
         }
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return bool
-     */
-    private function isDataAnInteger($data): bool
+    private function isDataAnInteger(mixed $data): bool
     {
-        return is_int($data) && ((int) $data > 0);
+        return is_int($data) && $data > 0;
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return bool
-     */
-    private function isDataAnArray($data): bool
+    private function isDataAnArray(mixed $data): bool
     {
         $isArrayHasId = is_array($data) && array_key_exists(self::KEY, $data);
 
         return $isArrayHasId && (is_null($data[self::KEY]) || $this->isDataAnInteger($data[self::KEY]));
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return int|null
-     */
-    private function getIdFromData($data): ?int
+    private function getIdFromData(mixed $data): int|null
     {
         if ($this->isDataAnInteger($data)) {
             return $data;

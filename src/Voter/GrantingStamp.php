@@ -6,14 +6,8 @@ use Symfony\Component\Messenger\Stamp\NonSendableStampInterface;
 
 class GrantingStamp implements NonSendableStampInterface
 {
-    private string $attribute;
-    private ?bool $vote;
-
-
-    public function __construct(string $attribute, ?bool $vote = null)
+    public function __construct(private readonly string $attribute, private readonly bool|null $vote = null)
     {
-        $this->attribute = $attribute;
-        $this->vote = $vote;
     }
 
     public function getAttribute(): string
@@ -21,7 +15,7 @@ class GrantingStamp implements NonSendableStampInterface
         return $this->attribute;
     }
 
-    public function getVote(): ?bool
+    public function getVote(): bool|null
     {
         return $this->vote;
     }

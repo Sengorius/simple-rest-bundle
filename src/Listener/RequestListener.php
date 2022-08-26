@@ -8,12 +8,9 @@ class RequestListener
 {
     const REQ_SERVER = '_requesting_server';
 
-    private string $defaultRequestingServer;
 
-
-    public function __construct(string $defaultRequestingServer)
+    public function __construct(private readonly string $defaultRequestingServer)
     {
-        $this->defaultRequestingServer = $defaultRequestingServer;
     }
 
     /**

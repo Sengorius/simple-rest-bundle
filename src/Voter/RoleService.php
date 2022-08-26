@@ -14,7 +14,7 @@ class RoleService extends RoleHierarchy
     const STRATEGY_OR = 'or';
 
     /** @var string[]|null */
-    private ?array $flatRoles = null;
+    private array|null $flatRoles = null;
 
 
     public function __construct(array $hierarchy)

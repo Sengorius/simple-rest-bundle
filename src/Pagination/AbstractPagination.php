@@ -11,7 +11,7 @@ abstract class AbstractPagination
      *
      * @return array
      */
-    abstract public function getPage(?int $page = null): array;
+    abstract public function getPage(int|null $page = null): array;
 
     /**
      * Return items of the next page by currentPage + 1

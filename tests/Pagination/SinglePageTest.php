@@ -6,9 +6,6 @@ use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 use SkriptManufaktur\SimpleRestBundle\Pagination\SinglePage;
 
-/**
- * Test SinglePageTest
- */
 class SinglePageTest extends TestCase
 {
     public function testSinglePageConstruction(): void

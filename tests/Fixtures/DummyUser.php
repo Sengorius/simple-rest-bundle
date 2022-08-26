@@ -7,19 +7,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class DummyUser implements UserInterface
 {
-    private string $username;
-    private ?string $password;
-    private array $roles;
+    private string|null $password = null;
 
 
-    public function __construct(?string $username, array $roles = [])
+    public function __construct(private readonly string|null $username, private readonly array $roles = [])
     {
         if ('' === $username || null === $username) {
             throw new InvalidArgumentException('The username cannot be empty.');
         }
-
-        $this->username = $username;
-        $this->roles = $roles;
     }
 
     public function __toString(): string
@@ -32,7 +27,7 @@ class DummyUser implements UserInterface
         return $this->roles;
     }
 
-    public function getPassword(): ?string
+    public function getPassword(): string|null
     {
         return $this->password;
     }
@@ -44,7 +39,7 @@ class DummyUser implements UserInterface
         return $this;
     }
 
-    public function getSalt(): ?string
+    public function getSalt(): string|null
     {
         return null;
     }

@@ -19,13 +19,11 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
     const PREVENT = 'entity_uuid_denormalize_prevent_recursion';
     const KEY = 'uuid';
 
-    private ManagerRegistry $registry;
     private DenormalizerInterface $denormalizer;
 
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(private readonly ManagerRegistry $registry)
     {
-        $this->registry = $registry;
     }
 
     public function setDenormalizer(DenormalizerInterface $denormalizer)
@@ -43,7 +41,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      *
      * @return bool
      */
-    public function supportsDenormalization($data, $type, $format = null, array $context = []): bool
+    public function supportsDenormalization(mixed $data, string $type, $format = null, array $context = []): bool
     {
         $entityClasses = isset($context[self::CLASS_MAP]) ? array_keys($context[self::CLASS_MAP]) : [];
         $matchesClass = in_array($type, $entityClasses);
@@ -65,7 +63,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize($data, $type, $format = null, array $context = []): object
+    public function denormalize(mixed $data, string $type, $format = null, array $context = []): object
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getUuidFromData($data);
@@ -89,34 +87,19 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
         }
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return bool
-     */
-    private function isDataAnUuid($data): bool
+    private function isDataAnUuid(mixed $data): bool
     {
         return is_string($data) && 1 === preg_match(self::UUID_REGEX, $data);
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return bool
-     */
-    private function isDataAnArray($data): bool
+    private function isDataAnArray(mixed $data): bool
     {
         $isArrayHasId = is_array($data) && array_key_exists(self::KEY, $data);
 
         return $isArrayHasId && (is_null($data[self::KEY]) || $this->isDataAnUuid($data[self::KEY]));
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return string|null
-     */
-    private function getUuidFromData($data): ?string
+    private function getUuidFromData(mixed $data): string|null
     {
         if ($this->isDataAnUuid($data)) {
             return $data;

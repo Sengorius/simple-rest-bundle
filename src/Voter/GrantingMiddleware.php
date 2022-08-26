@@ -10,14 +10,8 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class GrantingMiddleware implements MiddlewareInterface
 {
-    private AuthorizationCheckerInterface $authChecker;
-    private bool $throws;
-
-
-    public function __construct(AuthorizationCheckerInterface $authChecker, bool $throws = true)
+    public function __construct(private readonly AuthorizationCheckerInterface $authChecker, private readonly bool $throws = true)
     {
-        $this->authChecker = $authChecker;
-        $this->throws = $throws;
     }
 
     public function handle(Envelope $envelope, StackInterface $stack): Envelope

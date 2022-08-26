@@ -176,7 +176,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
      * @param string            $filterType
      * @param bool              $caseSensitive
      */
-    protected function addStringSearchTo(QueryBuilder $qb, string $field, $value, string $filterType = self::FILTER_EXACT, bool $caseSensitive = true): void
+    protected function addStringSearchTo(QueryBuilder $qb, string $field, string|array|null $value, string $filterType = self::FILTER_EXACT, bool $caseSensitive = true): void
     {
         // if nothing was passed, just return
         if (empty($value)) {
@@ -193,31 +193,14 @@ class ServiceEntityFactory extends ServiceEntityRepository
 
         foreach ($values as $v) {
             $parameterName = sprintf('%s_%s', str_replace(['.', ' '], '_', $field), $this->counter++);
-
-            switch ($filterType) {
-                case self::FILTER_EXACT:
-                    $statement = sprintf('%s LIKE :%s', $varName, $parameterName);
-                    break;
-
-                case self::FILTER_PARTIAL:
-                    $statement = sprintf('%s LIKE CONCAT(\'%%\', :%s, \'%%\')', $varName, $parameterName);
-                    break;
-
-                case self::FILTER_START:
-                    $statement = sprintf('%s LIKE CONCAT(:%s, \'%%\')', $varName, $parameterName);
-                    break;
-
-                case self::FILTER_END:
-                    $statement = sprintf('%s LIKE CONCAT(\'%%\', :%s)', $varName, $parameterName);
-                    break;
-
-                case self::FILTER_WORD_START:
-                    $statement = sprintf('%1$s LIKE CONCAT(:%2$s, \'%%\') OR %1$s LIKE CONCAT(\'%% \', :%2$s, \'%%\')', $varName, $parameterName);
-                    break;
-
-                default:
-                    throw new RuntimeException(sprintf('Filter-Type "%s" is unknown!', $filterType));
-            }
+            $statement = match ($filterType) {
+                self::FILTER_EXACT => sprintf('%s LIKE :%s', $varName, $parameterName),
+                self::FILTER_PARTIAL => sprintf('%s LIKE CONCAT(\'%%\', :%s, \'%%\')', $varName, $parameterName),
+                self::FILTER_START => sprintf('%s LIKE CONCAT(:%s, \'%%\')', $varName, $parameterName),
+                self::FILTER_END => sprintf('%s LIKE CONCAT(\'%%\', :%s)', $varName, $parameterName),
+                self::FILTER_WORD_START => sprintf('%1$s LIKE CONCAT(:%2$s, \'%%\') OR %1$s LIKE CONCAT(\'%% \', :%2$s, \'%%\')', $varName, $parameterName),
+                default => throw new RuntimeException(sprintf('Filter-Type "%s" is unknown!', $filterType)),
+            };
 
             $qb->andWhere($statement);
             $qb->setParameter($parameterName, $v);
@@ -234,7 +217,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
      *
      * @throws Exception
      */
-    protected function addDateSearchTo(QueryBuilder $qb, string $field, $value): void
+    protected function addDateSearchTo(QueryBuilder $qb, string $field, string|array|null $value): void
     {
         // if nothing was passed, just return
         if (empty($value)) {
@@ -267,28 +250,13 @@ class ServiceEntityFactory extends ServiceEntityRepository
 
                 $parameterName = sprintf('%s_%s_%s', str_replace(['.', ' '], '_', $field), $operator, $this->counter++);
                 $format = str_contains($date, 'T') ? 'Y-m-d H:i:s' : 'Y-m-d';
-
-                switch ($operator) {
-                    case 'gte':
-                        $sign = '>=';
-                        break;
-
-                    case 'lte':
-                        $sign = '<=';
-                        break;
-
-                    case 'gt':
-                        $sign = '>';
-                        break;
-
-                    case 'lt':
-                        $sign = '<';
-                        break;
-
-                    default:
-                        $sign = '=';
-                        break;
-                }
+                $sign = match ($operator) {
+                    'gte' => '>=',
+                    'lte' => '<=',
+                    'gt' => '>',
+                    'lt' => '<',
+                    default => '=',
+                };
 
                 $qb->andWhere(sprintf('%s %s :%s', $varName, $sign, $parameterName));
                 $qb->setParameter($parameterName, (new DateTime($date))->format($format));
@@ -303,7 +271,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
      * @param string          $field
      * @param bool|array|null $value
      */
-    protected function addBooleanSearchTo(QueryBuilder $qb, string $field, $value): void
+    protected function addBooleanSearchTo(QueryBuilder $qb, string $field, bool|array|null $value): void
     {
         // if nothing was passed or is given falsy, just return
         if (empty($value)) {
@@ -350,14 +318,9 @@ class ServiceEntityFactory extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @param string $field
-     *
-     * @return string
-     */
     private function unfoldQueryField(string $field): string
     {
-        if (0 === strpos($field, 't.')) {
+        if (str_starts_with($field, 't.')) {
             $field = substr($field, 2);
         }
 

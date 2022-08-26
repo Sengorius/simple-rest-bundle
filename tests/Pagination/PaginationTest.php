@@ -6,9 +6,6 @@ use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 use SkriptManufaktur\SimpleRestBundle\Pagination\Pagination;
 
-/**
- * Test ItemCountTest
- */
 class PaginationTest extends TestCase
 {
     public function testPaginationContruction(): void

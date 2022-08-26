@@ -17,7 +17,7 @@ class ValidationException extends RuntimeException
     private ConstraintViolationListInterface $violations;
 
 
-    public function __construct(object $entity, ConstraintViolationListInterface $violations, ?Throwable $previous = null)
+    public function __construct(object $entity, ConstraintViolationListInterface $violations, Throwable|null $previous = null)
     {
         parent::__construct(sprintf('Validation for object "%s" has failed!', get_class($entity)), self::EXCEPTION_CODE, $previous);
 

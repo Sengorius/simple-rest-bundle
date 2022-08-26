@@ -18,12 +18,9 @@ class ApiBusWrapper
     const TYPE_STRING = 'string';
     const TYPE_ARRAY = 'array';
 
-    private MessageBusInterface $bus;
 
-
-    public function __construct(MessageBusInterface $bus)
+    public function __construct(private readonly MessageBusInterface $bus)
     {
-        $this->bus = $bus;
     }
 
     /**
@@ -34,7 +31,7 @@ class ApiBusWrapper
      *
      * @return Envelope
      */
-    public function dispatch($message, array $stamps = []): Envelope
+    public function dispatch(object $message, array $stamps = []): Envelope
     {
         return $this->bus->dispatch($message, $stamps);
     }
@@ -51,7 +48,7 @@ class ApiBusWrapper
      *
      * @throws ApiBusException
      */
-    public function checkMessageResult(Envelope $envelope, array $expectedTypes = [])
+    public function checkMessageResult(Envelope $envelope, array $expectedTypes = []): mixed
     {
         // stop here, if the message will be sent to an asynchronous transport
         if (null !== $envelope->last(SentStamp::class)) {
@@ -92,7 +89,7 @@ class ApiBusWrapper
      *
      * @throws ApiBusException
      */
-    public function checkAllMessageResults(Envelope $envelope, array $expectedTypes = [])
+    public function checkAllMessageResults(Envelope $envelope, array $expectedTypes = []): array|false
     {
         // stop here, if the message will be sent to an asynchronous transport
         if (null !== $envelope->last(SentStamp::class)) {
@@ -156,7 +153,7 @@ class ApiBusWrapper
      *
      * @throws ApiBusException
      */
-    private function expectedTypesValid($result, array $expectedTypes): bool
+    private function expectedTypesValid(mixed $result, array $expectedTypes): bool
     {
         // if nothing is expected, anything is fine
         if (empty($expectedTypes)) {

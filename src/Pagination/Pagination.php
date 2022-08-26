@@ -8,13 +8,13 @@ class Pagination extends AbstractPagination
 {
     protected bool $booted = false;
     protected array $items = [];
-    protected ?int $itemCount = null;
-    protected ?int $itemsPerPage = null;
-    protected ?int $maxPages = null;
-    protected ?string $itemClass = null;
+    protected int|null $itemCount = null;
+    protected int|null $itemsPerPage = null;
+    protected int|null $maxPages = null;
+    protected string|null $itemClass = null;
     protected int $currentPage = 0;
-    protected ?int $lowerBound = null;
-    protected ?int $upperBound = null;
+    protected int|null $lowerBound = null;
+    protected int|null $upperBound = null;
     protected bool $isSatisfied = false;
     protected bool $isFirstPage = true;
     protected bool $isLastPage = false;
@@ -72,7 +72,7 @@ class Pagination extends AbstractPagination
      *
      * @return array
      */
-    public function getPage(?int $page = null): array
+    public function getPage(int|null $page = null): array
     {
         // take the current page, if not given
         if (null !== $page) {
@@ -181,7 +181,7 @@ class Pagination extends AbstractPagination
         return $this->maxPages;
     }
 
-    public function getItemClass(): ?string
+    public function getItemClass(): string|null
     {
         if (null === $this->itemClass) {
             throw new PaginationException('Pagination was not booted, yet.');
@@ -202,12 +202,12 @@ class Pagination extends AbstractPagination
         return $this;
     }
 
-    public function getLowerBound(): ?int
+    public function getLowerBound(): int|null
     {
         return $this->lowerBound;
     }
 
-    public function getUpperBound(): ?int
+    public function getUpperBound(): int|null
     {
         return $this->upperBound;
     }
@@ -292,7 +292,7 @@ class Pagination extends AbstractPagination
      *
      * @return string
      */
-    protected function testItemClass($item): string
+    protected function testItemClass(mixed $item): string
     {
         // if Doctrine uses its Proxy-Classes, give it a try
         if (is_object($item)) {

@@ -21,12 +21,8 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 
 class ApiResponseListener
 {
-    private array $firewallNames;
-
-
-    public function __construct(array $firewallNames)
+    public function __construct(private readonly array $firewallNames)
     {
-        $this->firewallNames = $firewallNames;
     }
 
     /**
@@ -75,7 +71,7 @@ class ApiResponseListener
             foreach ($session->getFlashBag()->all() as $type => $messages) {
                 $response->mergeMessages($type, $messages);
             }
-        } catch (SessionNotFoundException $e) {
+        } catch (SessionNotFoundException) {
             // just catch and throw away
         }
     }

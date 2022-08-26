@@ -72,7 +72,7 @@ class SinglePage extends Pagination
      *
      * @throws PaginationException
      */
-    public function getPage(?int $page = null): array
+    public function getPage(int|null $page = null): array
     {
         // take the current page, if not given
         if (null !== $page && $page !== $this->currentPage) {
