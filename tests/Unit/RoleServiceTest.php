@@ -2,6 +2,7 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Unit;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyUser;
 use SkriptManufaktur\SimpleRestBundle\Voter\RoleService;
@@ -44,6 +45,7 @@ class RoleServiceTest extends TestCase
         );
     }
 
+    /** @throws Exception */
     public function testUserHasRoles(): void
     {
         $user = new DummyUser('Dummy', ['ROLE_ADMIN']);
@@ -53,6 +55,7 @@ class RoleServiceTest extends TestCase
         static::assertFalse($this->roleService->userHasRoles($user, ['ROLE_MANAGER', 'ROLE_API']));
     }
 
+    /** @throws Exception */
     public function testUserHasRolesStrategyOr(): void
     {
         $user = new DummyUser('Dummy', ['ROLE_API']);
@@ -62,6 +65,7 @@ class RoleServiceTest extends TestCase
         static::assertFalse($this->roleService->userHasRoles($user, ['ROLE_ADMIN']), RoleService::STRATEGY_OR);
     }
 
+    /** @throws Exception */
     public function testTokenHasRoles(): void
     {
         $user = new DummyUser('Dummy', ['ROLE_ADMIN']);

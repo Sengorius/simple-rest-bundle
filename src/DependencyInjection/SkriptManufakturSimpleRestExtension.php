@@ -10,8 +10,6 @@ use SkriptManufaktur\SimpleRestBundle\Component\ApiBusWrapper;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiFilterService;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
-use SkriptManufaktur\SimpleRestBundle\Component\LegacyEntityIdDenormalizer;
-use SkriptManufaktur\SimpleRestBundle\Component\LegacyEntityUuidDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
 use SkriptManufaktur\SimpleRestBundle\Listener\RequestListener;
 use SkriptManufaktur\SimpleRestBundle\Voter\GrantingMiddleware;
@@ -21,13 +19,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 
-/**
- * Class SkriptManufakturSimpleRestExtension
- */
 class SkriptManufakturSimpleRestExtension extends Extension
 {
     /**
@@ -74,27 +68,19 @@ class SkriptManufakturSimpleRestExtension extends Extension
 
         // add serializer capabilities for Doctrine, if Doctrine is enabled
         if (class_exists(EntityManager::class)) {
-            $idNormalizer = EntityIdDenormalizer::class;
-            $uuidNormalizer = EntityUuidDenormalizer::class;
-
-            if (true === version_compare(Kernel::VERSION, '6.1.0', '<')) {
-                $idNormalizer = LegacyEntityIdDenormalizer::class;
-                $uuidNormalizer = LegacyEntityUuidDenormalizer::class;
-            }
-
             $container->setDefinition(
-                $idNormalizer,
-                (new Definition($idNormalizer, [new Reference('doctrine')]))
+                EntityIdDenormalizer::class,
+                (new Definition(EntityIdDenormalizer::class, [new Reference('doctrine')]))
                     ->addTag('serializer.normalizer')
             );
-            $container->setAlias('skriptmanufaktur.simple_rest.component.entity_id_denormalizer', $idNormalizer);
+            $container->setAlias('skriptmanufaktur.simple_rest.component.entity_id_denormalizer', EntityIdDenormalizer::class);
 
             $container->setDefinition(
-                $uuidNormalizer,
-                (new Definition($uuidNormalizer, [new Reference('doctrine')]))
+                EntityUuidDenormalizer::class,
+                (new Definition(EntityUuidDenormalizer::class, [new Reference('doctrine')]))
                     ->addTag('serializer.normalizer')
             );
-            $container->setAlias('skriptmanufaktur.simple_rest.component.entity_uuid_denormalizer', $uuidNormalizer);
+            $container->setAlias('skriptmanufaktur.simple_rest.component.entity_uuid_denormalizer', EntityUuidDenormalizer::class);
         }
 
         // add voting capabilities, if security is installed

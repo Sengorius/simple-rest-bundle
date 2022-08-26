@@ -6,18 +6,18 @@ use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 abstract class AbstractApiHandlerFactory
 {
     protected ValidatorInterface $validator;
-    protected SerializerInterface $serializer;
+    protected Serializer $serializer;
     protected ApiBusWrapper $apiBus;
     protected ApiFilterService $apiFilter;
 
 
-    public function setServices(ValidatorInterface $validator, SerializerInterface $serializer, ApiBusWrapper $apiBus, ApiFilterService $apiFilter): void
+    public function setServices(ValidatorInterface $validator, Serializer $serializer, ApiBusWrapper $apiBus, ApiFilterService $apiFilter): void
     {
         $this->validator = $validator;
         $this->serializer = $serializer;

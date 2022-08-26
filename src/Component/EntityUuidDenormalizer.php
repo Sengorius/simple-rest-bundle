@@ -7,10 +7,11 @@ use Exception;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
+class EntityUuidDenormalizer implements ContextAwareDenormalizerInterface, DenormalizerAwareInterface
 {
     use EntityDenormalizerTrait;
 
@@ -43,7 +44,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      *
      * @return bool
      */
-    public function supportsDenormalization($data, $type, $format = null, array $context = []): bool
+    public function supportsDenormalization($data, string $type, $format = null, array $context = []): bool
     {
         $entityClasses = isset($context[self::CLASS_MAP]) ? array_keys($context[self::CLASS_MAP]) : [];
         $matchesClass = in_array($type, $entityClasses);
@@ -65,7 +66,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize($data, $type, $format = null, array $context = []): object
+    public function denormalize($data, string $type, $format = null, array $context = []): object
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getUuidFromData($data);
