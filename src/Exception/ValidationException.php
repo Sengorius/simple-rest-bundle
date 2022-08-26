@@ -7,11 +7,7 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Throwable;
 use function get_class;
-use function is_object;
 
-/**
- * Class ValidationException
- */
 class ValidationException extends RuntimeException
 {
     const VALIDATION_ROOT_KEY = 'root';
@@ -21,13 +17,6 @@ class ValidationException extends RuntimeException
     private ConstraintViolationListInterface $violations;
 
 
-    /**
-     * ValidationException constructor.
-     *
-     * @param object                           $entity
-     * @param ConstraintViolationListInterface $violations
-     * @param Throwable|null                   $previous
-     */
     public function __construct(object $entity, ConstraintViolationListInterface $violations, ?Throwable $previous = null)
     {
         parent::__construct(sprintf('Validation for object "%s" has failed!', get_class($entity)), self::EXCEPTION_CODE, $previous);
@@ -43,7 +32,7 @@ class ValidationException extends RuntimeException
 
     public function getEntityClass(): string
     {
-        return is_object($this->entity) ? get_class($this->entity) : '';
+        return get_class($this->entity);
     }
 
     public function getViolations(): ConstraintViolationListInterface

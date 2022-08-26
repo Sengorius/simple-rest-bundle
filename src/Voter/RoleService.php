@@ -91,6 +91,7 @@ class RoleService extends RoleHierarchy
                 foreach ($roles as $r) {
                     $result = $result && in_array($r, $userRoles);
                 }
+
                 return $result;
         }
 
@@ -111,7 +112,9 @@ class RoleService extends RoleHierarchy
     public function tokenHasRoles(TokenInterface $token, array $roles, string $strategy = self::STRATEGY_AND): bool
     {
         /** @var UserInterface $user */
-        if (!($user = $token->getUser()) instanceof UserInterface) {
+        $user = $token->getUser();
+
+        if (!$user instanceof UserInterface) {
             $exception = new AuthenticationException(sprintf('Invalid token was given to %s', 'RoleService::tokenHasRoles()'));
             $exception->setToken($token);
 

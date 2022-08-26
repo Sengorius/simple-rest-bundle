@@ -19,17 +19,11 @@ use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 
-/**
- * Class ApiResponseListener
- */
 class ApiResponseListener
 {
     private array $firewallNames;
 
 
-    /**
-     * @param string[] $firewallNames
-     */
     public function __construct(array $firewallNames)
     {
         $this->firewallNames = $firewallNames;
@@ -68,7 +62,9 @@ class ApiResponseListener
         }
 
         /** @var ApiResponse $response */
-        if (!($response = $event->getResponse()) instanceof ApiResponse) {
+        $response = $event->getResponse();
+
+        if (!$response instanceof ApiResponse) {
             return;
         }
 

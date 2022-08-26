@@ -4,9 +4,6 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * Interface ApiFilterInterface
- */
 interface ApiFilterInterface
 {
     /**

@@ -6,24 +6,11 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 
-/**
- * Class SinglePage
- */
 class SinglePage extends Pagination
 {
     protected int $maxItems = 0;
 
 
-    /**
-     * SinglePage constructor.
-     *
-     * @param array $items
-     * @param int   $perPage
-     * @param int   $page
-     * @param int   $maxItems
-     *
-     * @throws PaginationException
-     */
     public function __construct(array $items, int $perPage, int $page, int $maxItems)
     {
         parent::__construct($items, $perPage);
@@ -33,15 +20,13 @@ class SinglePage extends Pagination
     }
 
     /**
-     * SinglePage constructor from Doctrine Paginator
-     *
      * @param Paginator $paginator
      * @param int       $perPage
      * @param int       $page
      *
      * @return SinglePage
      *
-     * @throws Exception|PaginationException
+     * @throws Exception
      */
     public static function fromDoctrinePaginator(Paginator $paginator, int $perPage, int $page): SinglePage
     {
@@ -51,11 +36,6 @@ class SinglePage extends Pagination
         return new self($items, $perPage, $page, $maxItems);
     }
 
-    /**
-     * Initialize the pagination
-     *
-     * @return SinglePage
-     */
     public function boot(): AbstractPagination
     {
         // trace all filters to get the main result

@@ -4,9 +4,6 @@ namespace SkriptManufaktur\SimpleRestBundle\Listener;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
-/**
- * Class RequestListener
- */
 class RequestListener
 {
     const REQ_SERVER = '_requesting_server';
@@ -14,11 +11,6 @@ class RequestListener
     private string $defaultRequestingServer;
 
 
-    /**
-     * RequestListener constructor.
-     *
-     * @param string $defaultRequestingServer
-     */
     public function __construct(string $defaultRequestingServer)
     {
         $this->defaultRequestingServer = $defaultRequestingServer;

@@ -2,9 +2,6 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Pagination;
 
-/**
- * Class AbstractPagination
- */
 abstract class AbstractPagination
 {
     /**

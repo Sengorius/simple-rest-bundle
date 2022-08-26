@@ -77,7 +77,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
             $idNormalizer = EntityIdDenormalizer::class;
             $uuidNormalizer = EntityUuidDenormalizer::class;
 
-            if (version_compare(Kernel::VERSION, '6.1.0', '<')) {
+            if (true === version_compare(Kernel::VERSION, '6.1.0', '<')) {
                 $idNormalizer = LegacyEntityIdDenormalizer::class;
                 $uuidNormalizer = LegacyEntityUuidDenormalizer::class;
             }

@@ -11,9 +11,6 @@ use Exception;
 use RuntimeException;
 use function get_class;
 
-/**
- * Class ServiceEntityFactory
- */
 class ServiceEntityFactory extends ServiceEntityRepository
 {
     const FILTER_EXACT = 'filter_exact';
@@ -25,13 +22,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     private int $counter = 1;
 
 
-    /**
-     * ServiceEntityFactory constructor.
-     *
-     * @param ManagerRegistry $registry
-     * @param string          $entityClass
-     */
-    public function __construct(ManagerRegistry $registry, string $entityClass = '')
+    public function __construct(ManagerRegistry $registry, string $entityClass)
     {
         parent::__construct($registry, $entityClass);
     }
@@ -278,11 +269,25 @@ class ServiceEntityFactory extends ServiceEntityRepository
                 $format = str_contains($date, 'T') ? 'Y-m-d H:i:s' : 'Y-m-d';
 
                 switch ($operator) {
-                    case 'gte':     $sign = '>=';   break;
-                    case 'lte':     $sign = '<=';   break;
-                    case 'gt':      $sign = '>';    break;
-                    case 'lt':      $sign = '<';    break;
-                    default:        $sign = '=';    break;
+                    case 'gte':
+                        $sign = '>=';
+                        break;
+
+                    case 'lte':
+                        $sign = '<=';
+                        break;
+
+                    case 'gt':
+                        $sign = '>';
+                        break;
+
+                    case 'lt':
+                        $sign = '<';
+                        break;
+
+                    default:
+                        $sign = '=';
+                        break;
                 }
 
                 $qb->andWhere(sprintf('%s %s :%s', $varName, $sign, $parameterName));
@@ -357,7 +362,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
         }
 
         // if only one '.' is used within
-        if (false !== ($firstIndex = strpos($field, '.')) && $firstIndex === strrpos($field, '.')) {
+        if (false !== ($firstIndex = strpos($field, '.')) && strrpos($field, '.') === $firstIndex) {
             return $field;
         }
 

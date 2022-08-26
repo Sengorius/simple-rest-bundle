@@ -4,9 +4,6 @@ namespace SkriptManufaktur\SimpleRestBundle\Pagination;
 
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 
-/**
- * Class Pagination
- */
 class Pagination extends AbstractPagination
 {
     protected bool $booted = false;
@@ -25,20 +22,8 @@ class Pagination extends AbstractPagination
     protected array $filters = [];
 
 
-    /**
-     * Pagination constructor.
-     *
-     * @param array $items
-     * @param int   $perPage
-     *
-     * @throws PaginationException
-     */
     public function __construct(array $items, int $perPage)
     {
-        if (!is_array($items)) {
-            throw new PaginationException(sprintf('A Pagination needs to be initiated with an Array, "%s" given.', get_class($items)));
-        }
-
         $this->items = $items;
         $this->itemsPerPage = $perPage;
 
@@ -63,11 +48,6 @@ class Pagination extends AbstractPagination
         }
     }
 
-    /**
-     * Initialize the pagination
-     *
-     * @return Pagination
-     */
     public function boot(): AbstractPagination
     {
         // trace all filters to get the main result
@@ -314,10 +294,12 @@ class Pagination extends AbstractPagination
      */
     protected function testItemClass($item): string
     {
+        // if Doctrine uses its Proxy-Classes, give it a try
         if (is_object($item)) {
-            // if Doctrine uses its Proxy-Classes, give it a try
             return str_replace('Proxies\\__CG__\\', '', get_class($item));
-        } elseif (is_array($item)) {
+        }
+
+        if (is_array($item)) {
             return 'array';
         }
 

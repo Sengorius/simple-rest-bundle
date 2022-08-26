@@ -9,9 +9,6 @@ use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Messenger\Stamp\SentStamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
-/**
- * Class ApiBusWrapper
- */
 class ApiBusWrapper
 {
     const TYPE_NULL = 'null';
@@ -24,11 +21,6 @@ class ApiBusWrapper
     private MessageBusInterface $bus;
 
 
-    /**
-     * ApiBusWrapper constructor.
-     *
-     * @param MessageBusInterface $bus
-     */
     public function __construct(MessageBusInterface $bus)
     {
         $this->bus = $bus;
@@ -67,8 +59,10 @@ class ApiBusWrapper
         }
 
         // get the last handled stamp to receive a result
-        /** @var HandledStamp $stamp */
-        if (null === ($stamp = $envelope->last(HandledStamp::class))) {
+        /** @var HandledStamp|null $stamp */
+        $stamp = $envelope->last(HandledStamp::class);
+
+        if (null === $stamp) {
             throw new ApiBusException(sprintf('Message "%s" did not return anything from handler!', get_class($envelope->getMessage())));
         }
 
@@ -143,8 +137,11 @@ class ApiBusWrapper
             return [];
         }
 
+        /** @var HandledStamp[] $handledStamps */
+        $handledStamps = $envelope->all(HandledStamp::class);
+
         return array_filter(
-            $envelope->all(HandledStamp::class),
+            $handledStamps,
             fn (HandledStamp $stamp) => $this->expectedTypesValid($stamp->getResult(), $expectedTypes)
         );
     }

@@ -8,9 +8,6 @@ use SkriptManufaktur\SimpleRestBundle\Pagination\Pagination;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\OptionsResolver\Options;
 
-/**
- * Class ApiControllerFactory
- */
 abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
 {
     /**

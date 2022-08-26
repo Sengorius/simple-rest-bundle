@@ -9,9 +9,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- * Class ApiHandlerFactory
- */
 abstract class AbstractApiHandlerFactory
 {
     protected ValidatorInterface $validator;
@@ -20,12 +17,6 @@ abstract class AbstractApiHandlerFactory
     protected ApiFilterService $apiFilter;
 
 
-    /**
-     * @param ValidatorInterface  $validator
-     * @param SerializerInterface $serializer
-     * @param ApiBusWrapper       $apiBus
-     * @param ApiFilterService    $apiFilter
-     */
     public function setServices(ValidatorInterface $validator, SerializerInterface $serializer, ApiBusWrapper $apiBus, ApiFilterService $apiFilter): void
     {
         $this->validator = $validator;

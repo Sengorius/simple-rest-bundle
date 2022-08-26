@@ -7,9 +7,6 @@ use ReflectionException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * Class ApiFilterService
- */
 class ApiFilterService
 {
     /**
