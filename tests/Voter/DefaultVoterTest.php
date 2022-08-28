@@ -6,6 +6,7 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DefaultVoter;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage;
+use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyVoter;
 use SkriptManufaktur\SimpleRestBundle\Voter\GrantingStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -22,7 +23,7 @@ class DefaultVoterTest extends TestCase
         parent::setUp();
 
         $this->token = $this->createMock(TokenInterface::class);
-        $this->manager = new AccessDecisionManager([new DefaultVoter()]);
+        $this->manager = new AccessDecisionManager([new DefaultVoter(), new DummyVoter()]);
     }
 
     public function testSuccessfulGranting(): void

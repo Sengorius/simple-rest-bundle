@@ -2,18 +2,20 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Voter;
 
-use Exception;
 use PHPUnit\Framework\TestCase;
+use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DefaultVoter;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyVoter;
 use SkriptManufaktur\SimpleRestBundle\Voter\GrantingStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 class GrantingVoterTest extends TestCase
 {
     private TokenInterface $token;
+    private DummyVoter $grantingVoter;
     private AccessDecisionManager $manager;
 
 
@@ -22,7 +24,8 @@ class GrantingVoterTest extends TestCase
         parent::setUp();
 
         $this->token = $this->createMock(TokenInterface::class);
-        $this->manager = new AccessDecisionManager([new DummyVoter()]);
+        $this->grantingVoter = new DummyVoter();
+        $this->manager = new AccessDecisionManager([$this->grantingVoter, new DefaultVoter()]);
     }
 
     public function testSuccessfulGranting(): void
@@ -31,6 +34,7 @@ class GrantingVoterTest extends TestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         static::assertTrue($this->decide([$envelope, $stamp]));
+        static::assertSame(VoterInterface::ACCESS_GRANTED, $this->vote([$envelope, $stamp]));
     }
 
     public function testFailedGranting(): void
@@ -39,6 +43,7 @@ class GrantingVoterTest extends TestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         static::assertFalse($this->decide([$envelope, $stamp]));
+        static::assertSame(VoterInterface::ACCESS_DENIED, $this->vote([$envelope, $stamp]));
     }
 
     public function testUnnoticedGranting(): void
@@ -47,44 +52,37 @@ class GrantingVoterTest extends TestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         static::assertFalse($this->decide([$envelope, $stamp]));
+        static::assertSame(VoterInterface::ACCESS_ABSTAIN, $this->vote([$envelope, $stamp]));
     }
 
     public function testSubjectNotAnArray(): void
     {
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('System Error: Subject for GrantingVoter is not an array!');
-
         $stamp = new GrantingStamp('access');
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
-        $this->decide($envelope);
+        static::assertFalse($this->decide($envelope));
+        static::assertSame(VoterInterface::ACCESS_ABSTAIN, $this->vote($envelope));
     }
 
     public function testSubjectIsWrongArrayCount(): void
     {
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('System Error: Subject must be an array with 2 values!');
-
-        $this->decide([]);
+        static::assertFalse($this->decide([]));
+        static::assertSame(VoterInterface::ACCESS_ABSTAIN, $this->vote([]));
     }
 
     public function testSubjectIsMissingEnvelope(): void
     {
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('System Error: Subject for GrantingVoter is malformed! Missing Envelope.');
-
-        $this->decide([null, null]);
+        static::assertFalse($this->decide([null, null]));
+        static::assertSame(VoterInterface::ACCESS_ABSTAIN, $this->vote([null, null]));
     }
 
     public function testSubjectIsMissingStamp(): void
     {
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('System Error: Subject for GrantingVoter is malformed! Missing GrantingStamp.');
-
         $stamp = new GrantingStamp('access');
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
-        $this->decide([$envelope, null]);
+        static::assertFalse($this->decide([$envelope, null]));
+        static::assertSame(VoterInterface::ACCESS_ABSTAIN, $this->vote([$envelope, null]));
     }
 
     /**
@@ -98,5 +96,18 @@ class GrantingVoterTest extends TestCase
     private function decide(mixed $subject): bool
     {
         return $this->manager->decide($this->token, [''], $subject);
+    }
+
+    /**
+     * This is a wrapper to make it easier, calling the Voter->vote()
+     * Our voter does not care about an $attribute, so it's left empty
+     *
+     * @param mixed $subject
+     *
+     * @return int
+     */
+    private function vote(mixed $subject): int
+    {
+        return $this->grantingVoter->vote($this->token, $subject, ['']);
     }
 }

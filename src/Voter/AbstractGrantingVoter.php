@@ -2,7 +2,6 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Voter;
 
-use Exception;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
@@ -16,13 +15,14 @@ abstract class AbstractGrantingVoter implements VoterInterface
      * @param array          $attributes
      *
      * @return int
-     *
-     * @throws Exception
      */
     public function vote(TokenInterface $token, mixed $subject, array $attributes): int
     {
         // we don't actually care about an attribute, as it is store in the stamp, anyway
-        $this->validateSubject($subject);
+        if (!$this->validateSubject($subject)) {
+            return self::ACCESS_ABSTAIN;
+        }
+
         [$envelope, $stamp] = $subject;
 
         try {
@@ -70,24 +70,26 @@ abstract class AbstractGrantingVoter implements VoterInterface
     /**
      * @param mixed $subject
      *
-     * @throws Exception
+     * @return bool
      */
-    private function validateSubject(mixed $subject): void
+    private function validateSubject(mixed $subject): bool
     {
         if (!is_array($subject)) {
-            throw new Exception('System Error: Subject for GrantingVoter is not an array!');
+            return false;
         }
 
         if (2 !== count($subject)) {
-            throw new Exception('System Error: Subject must be an array with 2 values!');
+            return false;
         }
 
         if (!$subject[0] instanceof Envelope) {
-            throw new Exception('System Error: Subject for GrantingVoter is malformed! Missing Envelope.');
+            return false;
         }
 
         if (!$subject[1] instanceof GrantingStampInterface) {
-            throw new Exception('System Error: Subject for GrantingVoter is malformed! Missing GrantingStamp.');
+            return false;
         }
+
+        return true;
     }
 }
