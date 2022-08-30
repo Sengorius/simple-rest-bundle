@@ -2,6 +2,27 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Voter;
 
-class AfterHandleGrantingStamp extends GrantingStamp
+use Symfony\Component\Messenger\Stamp\NonSendableStampInterface;
+
+class AfterHandleGrantingStamp implements NonSendableStampInterface, GrantingStampInterface
 {
+    private string $attribute;
+    private ?bool $vote;
+
+
+    public function __construct(string $attribute, ?bool $vote = null)
+    {
+        $this->attribute = $attribute;
+        $this->vote = $vote;
+    }
+
+    public function getAttribute(): string
+    {
+        return $this->attribute;
+    }
+
+    public function getVote(): ?bool
+    {
+        return $this->vote;
+    }
 }
