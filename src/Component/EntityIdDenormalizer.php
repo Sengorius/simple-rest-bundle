@@ -10,6 +10,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use function array_key_exists;
+use function in_array;
+use function is_array;
+use function is_int;
+use function is_null;
 
 class EntityIdDenormalizer implements ContextAwareDenormalizerInterface, DenormalizerAwareInterface
 {
@@ -45,8 +50,12 @@ class EntityIdDenormalizer implements ContextAwareDenormalizerInterface, Denorma
      */
     public function supportsDenormalization($data, string $type, $format = null, array $context = []): bool
     {
-        $entityClasses = isset($context[self::CLASS_MAP]) ? array_keys($context[self::CLASS_MAP]) : [];
-        $matchesClass = in_array($type, $entityClasses);
+        if (!isset($context[self::CLASS_MAP]) || !is_array($context[self::CLASS_MAP]) || empty($context[self::CLASS_MAP])) {
+            return false;
+        }
+
+        $this->normalizeClassMap($context[self::CLASS_MAP]);
+        $matchesClass = in_array($type, array_keys($this->normalizedClasses), true);
         $preventRecursion = isset($context[self::PREVENT]) && true === $context[self::PREVENT];
 
         return $matchesClass && !$preventRecursion && ($this->isDataAnInteger($data) || $this->isDataAnArray($data));
@@ -60,16 +69,16 @@ class EntityIdDenormalizer implements ContextAwareDenormalizerInterface, Denorma
      * @param string|null $format  Format the given data was extracted from
      * @param array       $context Options available to the denormalizer
      *
-     * @return object
+     * @return object|null
      *
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize($data, string $type, $format = null, array $context = []): object
+    public function denormalize($data, string $type, $format = null, array $context = []): ?object
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getIdFromData($data);
-        $hydratingMethod = $context[self::CLASS_MAP][$type] ?? 'find';
+        $hydratingMethod = $this->normalizedClasses[$type] ?? $this->defaultHydratingMethod;
 
         try {
             $result = $repository->{$hydratingMethod}($entityId);
