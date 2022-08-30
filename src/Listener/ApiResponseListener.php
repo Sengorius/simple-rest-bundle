@@ -173,6 +173,10 @@ class ApiResponseListener
     {
         $firewall = $request->attributes->get('_firewall_context');
 
+        if (empty($firewall)) {
+            return false;
+        }
+
         foreach ($this->firewallNames as $fn) {
             if (1 === preg_match('/'.$fn.'$/', $firewall)) {
                 return true;
