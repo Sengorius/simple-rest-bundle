@@ -6,6 +6,7 @@ use SkriptManufaktur\SimpleRestBundle\Exception\ApiBusException;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
+use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Messenger\Stamp\SentStamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
@@ -54,7 +55,7 @@ class ApiBusWrapper
     public function checkMessageResult(Envelope $envelope, array $expectedTypes = [])
     {
         // stop here, if the message will be sent to an asynchronous transport
-        if (null !== $envelope->last(SentStamp::class)) {
+        if (!$this->checkForSentStatus($envelope)) {
             return false;
         }
 
@@ -95,7 +96,7 @@ class ApiBusWrapper
     public function checkAllMessageResults(Envelope $envelope, array $expectedTypes = [])
     {
         // stop here, if the message will be sent to an asynchronous transport
-        if (null !== $envelope->last(SentStamp::class)) {
+        if (!$this->checkForSentStatus($envelope)) {
             return false;
         }
 
@@ -133,7 +134,7 @@ class ApiBusWrapper
     public function filterAllMessageResults(Envelope $envelope, array $expectedTypes = []): array
     {
         // stop here, if the message will be sent to an asynchronous transport
-        if (null !== $envelope->last(SentStamp::class)) {
+        if (!$this->checkForSentStatus($envelope)) {
             return [];
         }
 
@@ -179,5 +180,25 @@ class ApiBusWrapper
         $isObjectType = is_object($result) && in_array(get_class($result), $expectedTypes);
 
         return $isNullType || $isBoolType || $isObjectType || $isArrayType || $isIntType || $isDoubleType || $isStringType;
+    }
+
+    /**
+     * Returns false, if the envelope has more SentStamps than ReceivedStamps,
+     * which means, it's going to be handled by an external worker
+     *
+     * @param Envelope $envelope
+     *
+     * @return bool
+     */
+    private function checkForSentStatus(Envelope $envelope): bool
+    {
+        $sentStamps = $envelope->all(SentStamp::class);
+        $receivedStamps = $envelope->all(ReceivedStamp::class);
+
+        if (!empty($sentStamps) && count($sentStamps) !== count($receivedStamps)) {
+            return false;
+        }
+
+        return true;
     }
 }
