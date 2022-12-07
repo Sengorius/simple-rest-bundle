@@ -2,6 +2,7 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Voter;
 
+use BackedEnum;
 use Exception;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -25,7 +26,7 @@ class RoleService extends RoleHierarchy
     /**
      * Get the map of roles, created by Symfony security component
      *
-     * @return array
+     * @return string[][]
      */
     public function getRolesMap(): array
     {
@@ -35,7 +36,7 @@ class RoleService extends RoleHierarchy
     /**
      * Get a flat list of main roles, defined in security.yaml
      *
-     * @return array
+     * @return string[]
      */
     public function getFlatRoles(): array
     {
@@ -49,9 +50,9 @@ class RoleService extends RoleHierarchy
     /**
      * Find out, if a user has one or more specific roles or at least one of them
      *
-     * @param UserInterface $user
-     * @param array         $roles
-     * @param string        $strategy
+     * @param UserInterface         $user
+     * @param string[]|BackedEnum[] $roles
+     * @param string                $strategy
      *
      * @return bool
      *
@@ -71,7 +72,10 @@ class RoleService extends RoleHierarchy
         }
 
         // cast any role to string, in case the old Role class is used
-        $userRoles = array_map(fn ($role) => (string) $role, $user->getRoles());
+        $userRoles = array_map(
+            fn (string|BackedEnum $role): string => $role instanceof BackedEnum ? $role->value : (string) $role,
+            $user->getRoles()
+        );
 
         // get a flat list of roles, the user really has
         $userRoles = $this->getUserRoleList($userRoles);
@@ -80,6 +84,10 @@ class RoleService extends RoleHierarchy
         switch ($strategy) {
             case self::STRATEGY_OR:
                 foreach ($roles as $r) {
+                    if ($r instanceof BackedEnum) {
+                        $r = $r->value;
+                    }
+
                     if (in_array($r, $userRoles)) {
                         return true;
                     }
@@ -89,6 +97,10 @@ class RoleService extends RoleHierarchy
             case self::STRATEGY_AND:
                 $result = true;
                 foreach ($roles as $r) {
+                    if ($r instanceof BackedEnum) {
+                        $r = $r->value;
+                    }
+
                     $result = $result && in_array($r, $userRoles);
                 }
 
@@ -101,9 +113,9 @@ class RoleService extends RoleHierarchy
     /**
      * Find out, if a user has one or more specific roles or at least one of them
      *
-     * @param TokenInterface $token
-     * @param array          $roles
-     * @param string         $strategy
+     * @param TokenInterface        $token
+     * @param string[]|BackedEnum[] $roles
+     * @param string                $strategy
      *
      * @return bool
      *

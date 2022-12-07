@@ -5,6 +5,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Tests\Unit;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyUser;
+use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyUserRoles;
 use SkriptManufaktur\SimpleRestBundle\Voter\RoleService;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 
@@ -74,5 +75,36 @@ class RoleServiceTest extends TestCase
         static::assertTrue($this->roleService->tokenHasRoles($token, ['ROLE_USER', 'ROLE_DIRECTOR']));
         static::assertTrue($this->roleService->tokenHasRoles($token, ['ROLE_MANAGER', 'ROLE_DIRECTOR']));
         static::assertFalse($this->roleService->tokenHasRoles($token, ['ROLE_MANAGER', 'ROLE_API']));
+    }
+
+    /** @throws Exception */
+    public function testUserHasEnumRoles(): void
+    {
+        $user = new DummyUser('Dummy', [DummyUserRoles::ADMIN]);
+
+        static::assertTrue($this->roleService->userHasRoles($user, [DummyUserRoles::USER, DummyUserRoles::DIRECTOR]));
+        static::assertTrue($this->roleService->userHasRoles($user, [DummyUserRoles::MANAGER, DummyUserRoles::DIRECTOR]));
+        static::assertFalse($this->roleService->userHasRoles($user, [DummyUserRoles::MANAGER, DummyUserRoles::API]));
+    }
+
+    /** @throws Exception */
+    public function testUserHasEnumRolesStrategyOr(): void
+    {
+        $user = new DummyUser('Dummy', [DummyUserRoles::API]);
+
+        static::assertTrue($this->roleService->userHasRoles($user, [DummyUserRoles::API, DummyUserRoles::DIRECTOR], RoleService::STRATEGY_OR));
+        static::assertFalse($this->roleService->userHasRoles($user, [DummyUserRoles::MANAGER]), RoleService::STRATEGY_OR);
+        static::assertFalse($this->roleService->userHasRoles($user, [DummyUserRoles::ADMIN]), RoleService::STRATEGY_OR);
+    }
+
+    /** @throws Exception */
+    public function testTokenHasEnumRoles(): void
+    {
+        $user = new DummyUser('Dummy', [DummyUserRoles::ADMIN]);
+        $token = new PreAuthenticatedToken($user, 'api', $user->getRoles());
+
+        static::assertTrue($this->roleService->tokenHasRoles($token, [DummyUserRoles::USER, DummyUserRoles::DIRECTOR]));
+        static::assertTrue($this->roleService->tokenHasRoles($token, [DummyUserRoles::MANAGER, DummyUserRoles::DIRECTOR]));
+        static::assertFalse($this->roleService->tokenHasRoles($token, [DummyUserRoles::MANAGER, DummyUserRoles::API]));
     }
 }
