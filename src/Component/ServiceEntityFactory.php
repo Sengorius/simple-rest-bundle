@@ -274,7 +274,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     protected function addBooleanSearchTo(QueryBuilder $qb, string $field, bool|array|null $value): void
     {
         // if nothing was passed or is given falsy, just return
-        if (empty($value)) {
+        if (is_null($value) || is_array($value) && empty($value)) {
             return;
         }
 
