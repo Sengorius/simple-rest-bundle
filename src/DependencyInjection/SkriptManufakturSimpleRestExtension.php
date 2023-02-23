@@ -7,7 +7,6 @@ use Exception;
 use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiControllerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiHandlerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiBusWrapper;
-use SkriptManufaktur\SimpleRestBundle\Component\ApiFilterService;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
@@ -44,15 +43,11 @@ class SkriptManufakturSimpleRestExtension extends Extension
         );
         $container->setAlias('skriptmanufaktur.simple_rest.component.api_bus_wrapper', ApiBusWrapper::class);
 
-        $container->setDefinition(ApiFilterService::class, (new Definition(ApiFilterService::class)));
-        $container->setAlias('skriptmanufaktur.simple_rest.component.api_filter_service', ApiBusWrapper::class);
-
         // register all our provider interfaces with a tag
         $abstractApiServices = [
             new Reference('validator'),
             new Reference('serializer'),
             new Reference(ApiBusWrapper::class),
-            new Reference(ApiFilterService::class),
         ];
 
         $container->registerForAutoconfiguration(AbstractApiHandlerFactory::class)

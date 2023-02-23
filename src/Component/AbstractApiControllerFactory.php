@@ -2,11 +2,16 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Component;
 
-use Exception;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use SkriptManufaktur\SimpleRestBundle\Pagination\Pagination;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\OptionsResolver\Options;
+use function array_map;
+use function in_array;
+use function json_decode;
+use function json_last_error;
+use function json_last_error_msg;
+use function sprintf;
+use function strtoupper;
 
 abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
 {
@@ -15,7 +20,7 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
      *
      * @return array
      *
-     * @throws Exception
+     * @throws ApiProcessException
      */
     protected function unpackRequestContent(Request $request): array
     {
@@ -33,53 +38,6 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
         }
 
         return $content;
-    }
-
-    /**
-     * Collect and test parameters from query string into an array
-     * It is used like so: https://domain.tld/path?email=mail@example.org&created[lte]=2020-01-01&sort[created]=desc
-     *
-     * @param Request $request
-     * @param string  $filterInterface
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    protected function collectFilterData(Request $request, string $filterInterface): array
-    {
-        [$searches, $sorts] = $this->apiFilter->createOptionResolvers($filterInterface);
-
-        // collect any query parameter that is known by current filter defaults
-        $queryParameters = [];
-        $sortParameters = [];
-        foreach ($request->query->all() as $key => $value) {
-            // normalize the page
-            if ('page' === $key) {
-                $page = (int) $value;
-
-                if ($page >= 1) {
-                    $queryParameters['page'] = $page - 1;
-                }
-            } elseif ('sort' === $key && is_array($value)) {
-                foreach ($value as $sortField => $direction) {
-                    $direction = is_string($direction) ? strtoupper($direction) : null;
-
-                    if ($sorts->hasDefault($sortField) && in_array($direction, ['ASC', 'DESC'])) {
-                        $sortParameters[$sortField] = $direction;
-                    }
-                }
-            } elseif ($searches->hasDefault($key)) {
-                $queryParameters[$key] = $value;
-
-                // add possible type casting for booleans
-                if (!is_array($value) && in_array(strtolower($value), ['true', 'false', 't', 'f'])) {
-                    $searches->addNormalizer($key, fn (Options $options, $value) => in_array(strtolower($value), ['true', 't']));
-                }
-            }
-        }
-
-        return $this->apiFilter->resolveFilterData($searches, $sorts, $queryParameters, $sortParameters);
     }
 
     /**

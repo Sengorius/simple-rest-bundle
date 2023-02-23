@@ -14,15 +14,13 @@ abstract class AbstractApiHandlerFactory
     protected ValidatorInterface $validator;
     protected Serializer $serializer;
     protected ApiBusWrapper $apiBus;
-    protected ApiFilterService $apiFilter;
 
 
-    public function setServices(ValidatorInterface $validator, Serializer $serializer, ApiBusWrapper $apiBus, ApiFilterService $apiFilter): void
+    public function setServices(ValidatorInterface $validator, Serializer $serializer, ApiBusWrapper $apiBus): void
     {
         $this->validator = $validator;
         $this->serializer = $serializer;
         $this->apiBus = $apiBus;
-        $this->apiFilter = $apiFilter;
     }
 
     /**
