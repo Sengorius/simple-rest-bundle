@@ -9,17 +9,21 @@ use SkriptManufaktur\SimpleRestBundle\Component\AbstractApiHandlerFactory;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiBusWrapper;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
+use SkriptManufaktur\SimpleRestBundle\Component\ValidationMiddleware;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
 use SkriptManufaktur\SimpleRestBundle\Listener\RequestListener;
 use SkriptManufaktur\SimpleRestBundle\Voter\GrantingMiddleware;
 use SkriptManufaktur\SimpleRestBundle\Voter\RoleService;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SkriptManufakturSimpleRestExtension extends Extension
 {
@@ -43,6 +47,14 @@ class SkriptManufakturSimpleRestExtension extends Extension
         );
         $container->setAlias('skriptmanufaktur.simple_rest.component.api_bus_wrapper', ApiBusWrapper::class);
 
+        if (!interface_exists(ValidatorInterface::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Validator to be installed.');
+        }
+
+        if (!interface_exists(SerializerInterface::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Serializer to be installed.');
+        }
+
         // register all our provider interfaces with a tag
         $abstractApiServices = [
             new Reference('validator'),
@@ -60,6 +72,12 @@ class SkriptManufakturSimpleRestExtension extends Extension
             ->addTag('controller.service_arguments')
             ->addMethodCall('setServices', $abstractApiServices)
         ;
+
+        // add services and middlewares
+        $container->setDefinition(
+            ValidationMiddleware::class,
+            (new Definition(ValidationMiddleware::class, [new Reference('validator')]))
+        );
 
         // add serializer capabilities for Doctrine, if Doctrine is enabled
         if (class_exists(EntityManager::class)) {
