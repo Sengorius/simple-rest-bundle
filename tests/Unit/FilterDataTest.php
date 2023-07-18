@@ -143,7 +143,7 @@ class FilterDataTest extends TestCase
 
         $filter = FilterData::createFromAttributes(DummyFilterObject::class, $data, $sort);
 
-        $expectedSerialized = 'O:54:"SkriptManufaktur\SimpleRestBundle\Component\FilterData":3:{s:6:"search";a:5:{s:4:"date";s:10:"2023-02-23";s:7:"enabled";b:1;s:4:"page";i:1;s:4:"name";s:3:"Sam";s:4:"rank";a:1:{s:3:"gte";i:2;}}s:4:"sort";a:2:{s:4:"date";N;s:4:"rank";s:3:"ASC";}s:9:"interface";s:66:"SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyFilterObject";}';
+        $expectedSerialized = 'O:54:"SkriptManufaktur\SimpleRestBundle\Component\FilterData":3:{s:6:"search";a:5:{s:4:"date";s:10:"'.date('Y-m-d').'";s:7:"enabled";b:1;s:4:"page";i:1;s:4:"name";s:3:"Sam";s:4:"rank";a:1:{s:3:"gte";i:2;}}s:4:"sort";a:2:{s:4:"date";N;s:4:"rank";s:3:"ASC";}s:9:"interface";s:66:"SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyFilterObject";}';
         $serializedFilter = serialize($filter);
         static::assertIsString($serializedFilter);
         static::assertSame($expectedSerialized, $serializedFilter);
@@ -175,7 +175,7 @@ class FilterDataTest extends TestCase
 
         $filter = FilterData::createFromAttributes(DummyFilterObject::class, $data, $sort);
 
-        $expectedSerialized = '{"search":{"date":"2023-02-23","enabled":true,"page":1,"name":"Sam","rank":{"gte":2}},"sort":{"date":null,"rank":"ASC"},"interface":"SkriptManufaktur\\\\SimpleRestBundle\\\\Tests\\\\Fixtures\\\\DummyFilterObject"}';
+        $expectedSerialized = '{"search":{"date":"'.date('Y-m-d').'","enabled":true,"page":1,"name":"Sam","rank":{"gte":2}},"sort":{"date":null,"rank":"ASC"},"interface":"SkriptManufaktur\\\\SimpleRestBundle\\\\Tests\\\\Fixtures\\\\DummyFilterObject"}';
         $serializedFilter = $filter->serialize();
         static::assertIsString($serializedFilter);
         static::assertSame($expectedSerialized, $serializedFilter);
