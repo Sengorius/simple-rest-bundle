@@ -2,10 +2,16 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Fixtures;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class EmbeddedDummyEntity
 {
+    #[Assert\GreaterThanOrEqual(value: 0)]
     private int $id = 0;
+
+    #[Assert\NotBlank]
     private string $type = '';
+
     private bool $active = true;
     private DummyEntity|null $dummy = null;
 

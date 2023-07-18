@@ -5,14 +5,34 @@ namespace SkriptManufaktur\SimpleRestBundle\Tests\Fixtures;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class DummyEntity
 {
+    #[Assert\GreaterThanOrEqual(value: 0)]
     private int $id = 0;
+
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3)]
     private string $username = '';
+
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private string $email = '';
+
+    #[Assert\All([
+        new Assert\Type(type: EmbeddedDummyEntity::class),
+        new Assert\Valid(),
+    ], groups: ['Default', 'with-embeds'])]
     private Collection $embeds;
+
+    #[Assert\All([
+        new Assert\Type(type: EmbeddedUuidDummyEntity::class),
+        new Assert\Valid(),
+    ], groups: ['Default', 'with-embeds'])]
     private Collection $uuidEmbeds;
+
+    #[Assert\Type(type: DateTime::class)]
     private DateTime $created;
 
 
