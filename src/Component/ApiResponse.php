@@ -2,11 +2,14 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Component;
 
+use SkriptManufaktur\SimpleRestBundle\Validation\ValidationPreparationTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
 
 class ApiResponse extends JsonResponse
 {
+    use ValidationPreparationTrait;
+
     const MSGTYPE_SUCCESS = 'success';
     const MSGTYPE_INFO = 'info';
     const MSGTYPE_WARNING = 'warning';
@@ -116,14 +119,7 @@ class ApiResponse extends JsonResponse
 
     public function addValidationIssue(string $component, string $message): self
     {
-        if ('' === $component) {
-            $component = self::VALID_ROOT;
-        }
-
-        if (!array_key_exists($component, $this->validation)) {
-            $this->validation[$component] = [];
-        }
-
+        $component = $this->prepareValidation($component, $this->validation, self::VALID_ROOT);
         $this->validation[$component][] = $message;
         $this->updateApiData();
 
@@ -132,14 +128,11 @@ class ApiResponse extends JsonResponse
 
     public function mergeValidationIssues(string $component, array $messages): self
     {
-        if ('' === $component) {
-            $component = self::VALID_ROOT;
+        if (empty($messages)) {
+            return $this;
         }
 
-        if (!array_key_exists($component, $this->apiMessages)) {
-            $this->validation[$component] = [];
-        }
-
+        $component = $this->prepareValidation($component, $this->validation, self::VALID_ROOT);
         $this->validation[$component] = array_merge($this->validation[$component], $messages);
         $this->updateApiData();
 

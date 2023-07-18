@@ -3,6 +3,7 @@
 namespace SkriptManufaktur\SimpleRestBundle\Exception;
 
 use RuntimeException;
+use SkriptManufaktur\SimpleRestBundle\Validation\ValidationPreparationTrait;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Throwable;
@@ -10,6 +11,8 @@ use function get_class;
 
 class ValidationException extends RuntimeException
 {
+    use ValidationPreparationTrait;
+
     const VALIDATION_ROOT_KEY = 'root';
     const EXCEPTION_CODE = 334;
 
@@ -48,20 +51,11 @@ class ValidationException extends RuntimeException
 
         /** @var ConstraintViolationInterface $violation */
         foreach ($this->violations as $violation) {
-            $propertyPath = $violation->getPropertyPath();
-
-            if ('' === $propertyPath) {
-                $propertyPath = self::VALIDATION_ROOT_KEY;
-            }
-
-            // matching, e.g. "data[email]" or "options[email]" in an object sub-array, resolve to "email"
-            if (1 === preg_match('~(?:data|options)\[(.+)]~', $propertyPath, $match)) {
-                $propertyPath = $match[1];
-            }
-
-            if (!isset($violations[$propertyPath])) {
-                $violations[$propertyPath] = [];
-            }
+            $propertyPath = $this->prepareValidation(
+                propertyPath: $violation->getPropertyPath(),
+                validationList: $violations,
+                defaultRoot: self::VALIDATION_ROOT_KEY
+            );
 
             $violations[$propertyPath][] = $violation->getMessage();
         }

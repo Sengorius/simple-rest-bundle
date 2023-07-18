@@ -60,9 +60,18 @@ class ExceptionTest extends TestCase
 
         $violationList = new ConstraintViolationList([
             new ConstraintViolation('Name not set', '', [], null, 'name', null),
+            new ConstraintViolation('Global error', '', [], null, '', null),
         ]);
         $exception = new ValidationException($entity, $violationList, $previousException);
         $violations = $exception->getStringifiedViolations();
+        $expectedViolations = [
+            'root' => [
+                'Global error',
+            ],
+            'name' => [
+                'Name not set',
+            ],
+        ];
 
         static::assertInstanceOf(RuntimeException::class, $exception);
         static::assertSame('Validation for object "stdClass" has failed!', $exception->getMessage());
@@ -70,6 +79,8 @@ class ExceptionTest extends TestCase
         static::assertSame($previousException, $exception->getPrevious());
         static::assertSame('stdClass', $exception->getEntityClass());
         static::assertArrayHasKey('name', $violations);
+        static::assertArrayHasKey('root', $violations);
         static::assertCount(1, $violations['name']);
+        static::assertSame($expectedViolations, $violations);
     }
 }
