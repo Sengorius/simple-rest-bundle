@@ -1,6 +1,6 @@
 <?php
 
-namespace SkriptManufaktur\SimpleRestBundle\Component;
+namespace SkriptManufaktur\SimpleRestBundle\Validation;
 
 use SkriptManufaktur\SimpleRestBundle\Exception\ValidationException;
 use Symfony\Component\Messenger\Envelope;
