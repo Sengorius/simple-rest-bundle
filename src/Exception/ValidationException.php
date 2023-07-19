@@ -51,6 +51,10 @@ class ValidationException extends RuntimeException
 
         /** @var ConstraintViolationInterface $violation */
         foreach ($this->violations as $violation) {
+            if (empty($violation->getMessage())) {
+                continue;
+            }
+
             $propertyPath = $this->prepareValidation(
                 propertyPath: $violation->getPropertyPath(),
                 validationList: $violations,

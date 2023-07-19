@@ -71,7 +71,42 @@ class ApiResponseTest extends TestCase
             ->addValidationIssue('name', 'Problem with name')
             ->addValidationIssue('address', 'Prob. with a')
             ->addValidationIssue('address', 'Prob. with b')
+            ->addValidationIssue('contact', '')
         ;
+
+        static::assertInstanceOf(ApiResponse::class, $response);
+        static::assertSame(400, $response->getStatusCode());
+        static::assertSame([], $response->getData());
+        static::assertSame(
+            sprintf('{"data":[],"messages":{"success":[],"info":[],"warning":[],"error":[]},"validation":%s}', $validation),
+            $response->getContent()
+        );
+    }
+
+    public function testValidationMerge(): void
+    {
+        $validation = '{"root":["Problem in root"],"name":["Problem with name"],"address":["Prob. with a","Prob. with b"]}';
+        $validationInput = [
+            '' => [
+                'Problem in root',
+            ],
+            'name' => [
+                'Problem with name',
+            ],
+            'address' => [
+                'Prob. with a',
+                'Prob. with b',
+            ],
+            'contact' => [
+                '',
+            ],
+        ];
+
+        $response = ApiResponse::create([], 400);
+
+        foreach ($validationInput as $propPath => $vi) {
+            $response->mergeValidationIssues($propPath, $vi);
+        }
 
         static::assertInstanceOf(ApiResponse::class, $response);
         static::assertSame(400, $response->getStatusCode());

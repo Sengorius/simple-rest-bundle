@@ -119,6 +119,10 @@ class ApiResponse extends JsonResponse
 
     public function addValidationIssue(string $component, string $message): self
     {
+        if (empty($message)) {
+            return $this;
+        }
+
         $component = $this->prepareValidation($component, $this->validation, self::VALID_ROOT);
         $this->validation[$component][] = $message;
         $this->updateApiData();
@@ -128,6 +132,8 @@ class ApiResponse extends JsonResponse
 
     public function mergeValidationIssues(string $component, array $messages): self
     {
+        $messages = array_filter($messages, fn ($message): bool => is_string($message) && !empty($message));
+
         if (empty($messages)) {
             return $this;
         }
