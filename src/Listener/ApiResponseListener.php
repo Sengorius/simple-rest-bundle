@@ -124,6 +124,7 @@ class ApiResponseListener
 
             case $exception instanceof ValidationException:
                 $response->setThrowable(null);
+                $response->setData(); // clears earlier set throwable from data output
                 $response->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
                 $this->fetchValidationException($response, $exception);
                 break;
