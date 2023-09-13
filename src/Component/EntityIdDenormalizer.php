@@ -19,9 +19,9 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
 {
     use EntityDenormalizerTrait;
 
-    const CLASS_MAP = 'entity_id_denormalize_class_map';
-    const PREVENT = 'entity_id_denormalize_prevent_recursion';
-    const KEY = 'id';
+    public const CLASS_MAP = 'entity_id_denormalize_class_map';
+    public const PREVENT = 'entity_id_denormalize_prevent_recursion';
+    public const KEY = 'id';
 
     private DenormalizerInterface $denormalizer;
 
@@ -30,7 +30,7 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
     {
     }
 
-    public function setDenormalizer(DenormalizerInterface $denormalizer)
+    public function setDenormalizer(DenormalizerInterface $denormalizer): void
     {
         $this->denormalizer = $denormalizer;
     }
@@ -45,7 +45,7 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
      *
      * @return bool
      */
-    public function supportsDenormalization(mixed $data, string $type, $format = null, array $context = []): bool
+    public function supportsDenormalization(mixed $data, string $type, string|null $format = null, array $context = []): bool
     {
         if (!isset($context[self::CLASS_MAP]) || !is_array($context[self::CLASS_MAP]) || empty($context[self::CLASS_MAP])) {
             return false;
@@ -56,6 +56,20 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
         $preventRecursion = isset($context[self::PREVENT]) && true === $context[self::PREVENT];
 
         return $matchesClass && !$preventRecursion && ($this->isDataAnInteger($data) || $this->isDataAnArray($data));
+    }
+
+    /**
+     * Returns the types potentially supported by this denormalizer.
+     *
+     * @param string|null $format
+     *
+     * @return array<class-string|'*'|'object'|string, bool|null>
+     */
+    public function getSupportedTypes(string|null $format): array
+    {
+        return [
+            '*' => false,
+        ];
     }
 
     /**
@@ -71,7 +85,7 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize(mixed $data, string $type, $format = null, array $context = []): object|null
+    public function denormalize(mixed $data, string $type, string|null $format = null, array $context = []): object|null
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getIdFromData($data);

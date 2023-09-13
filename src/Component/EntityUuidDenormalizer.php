@@ -21,10 +21,10 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
 {
     use EntityDenormalizerTrait;
 
-    const UUID_REGEX = '#\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b#';
-    const CLASS_MAP = 'entity_uuid_denormalize_class_map';
-    const PREVENT = 'entity_uuid_denormalize_prevent_recursion';
-    const KEY = 'uuid';
+    public const UUID_REGEX = '#\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b#';
+    public const CLASS_MAP = 'entity_uuid_denormalize_class_map';
+    public const PREVENT = 'entity_uuid_denormalize_prevent_recursion';
+    public const KEY = 'uuid';
 
     private DenormalizerInterface $denormalizer;
 
@@ -33,7 +33,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
     {
     }
 
-    public function setDenormalizer(DenormalizerInterface $denormalizer)
+    public function setDenormalizer(DenormalizerInterface $denormalizer): void
     {
         $this->denormalizer = $denormalizer;
     }
@@ -48,7 +48,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      *
      * @return bool
      */
-    public function supportsDenormalization(mixed $data, string $type, $format = null, array $context = []): bool
+    public function supportsDenormalization(mixed $data, string $type, string|null $format = null, array $context = []): bool
     {
         if (!isset($context[self::CLASS_MAP]) || !is_array($context[self::CLASS_MAP]) || empty($context[self::CLASS_MAP])) {
             return false;
@@ -59,6 +59,20 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
         $preventRecursion = isset($context[self::PREVENT]) && true === $context[self::PREVENT];
 
         return $matchesClass && !$preventRecursion && ($this->isDataAnUuid($data) || $this->isDataAnArray($data));
+    }
+
+    /**
+     * Returns the types potentially supported by this denormalizer.
+     *
+     * @param string|null $format
+     *
+     * @return array<class-string|'*'|'object'|string, bool|null>
+     */
+    public function getSupportedTypes(string|null $format): array
+    {
+        return [
+            '*' => false,
+        ];
     }
 
     /**
@@ -74,7 +88,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface
      */
-    public function denormalize(mixed $data, string $type, $format = null, array $context = []): object|null
+    public function denormalize(mixed $data, string $type, string|null $format = null, array $context = []): object|null
     {
         $repository = $this->getRepository($type);
         $entityId = $this->getUuidFromData($data);
