@@ -13,11 +13,11 @@ use function get_class;
 
 class ServiceEntityFactory extends ServiceEntityRepository
 {
-    const FILTER_EXACT = 'filter_exact';
-    const FILTER_START = 'filter_start';
-    const FILTER_END = 'filter_end';
-    const FILTER_PARTIAL = 'filter_partial';
-    const FILTER_WORD_START = 'filter_word_start';
+    public const FILTER_EXACT = 'filter_exact';
+    public const FILTER_START = 'filter_start';
+    public const FILTER_END = 'filter_end';
+    public const FILTER_PARTIAL = 'filter_partial';
+    public const FILTER_WORD_START = 'filter_word_start';
 
     private int $counter = 1;
 

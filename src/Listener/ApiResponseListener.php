@@ -21,9 +21,9 @@ use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 
-class ApiResponseListener
+final readonly class ApiResponseListener
 {
-    public function __construct(private readonly array $firewallNames)
+    public function __construct(private array $firewallNames)
     {
     }
 

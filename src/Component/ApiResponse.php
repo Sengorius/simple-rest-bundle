@@ -10,17 +10,17 @@ class ApiResponse extends JsonResponse
 {
     use ValidationPreparationTrait;
 
-    const MSGTYPE_SUCCESS = 'success';
-    const MSGTYPE_INFO = 'info';
-    const MSGTYPE_WARNING = 'warning';
-    const MSGTYPE_ERROR = 'error';
-    const EMPTY_MESSAGES = [
+    public const MSGTYPE_SUCCESS = 'success';
+    public const MSGTYPE_INFO = 'info';
+    public const MSGTYPE_WARNING = 'warning';
+    public const MSGTYPE_ERROR = 'error';
+    public const EMPTY_MESSAGES = [
         self::MSGTYPE_SUCCESS => [],
         self::MSGTYPE_INFO => [],
         self::MSGTYPE_WARNING => [],
         self::MSGTYPE_ERROR => [],
     ];
-    const VALID_ROOT = 'root';
+    public const VALID_ROOT = 'root';
 
     private array $apiData = [];
     private array $apiMessages = self::EMPTY_MESSAGES;

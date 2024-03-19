@@ -12,12 +12,12 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
 
 class ApiBusWrapper
 {
-    const TYPE_NULL = 'null';
-    const TYPE_BOOL = 'bool';
-    const TYPE_INT = 'int';
-    const TYPE_DOUBLE = 'double';
-    const TYPE_STRING = 'string';
-    const TYPE_ARRAY = 'array';
+    public const TYPE_NULL = 'null';
+    public const TYPE_BOOL = 'bool';
+    public const TYPE_INT = 'int';
+    public const TYPE_DOUBLE = 'double';
+    public const TYPE_STRING = 'string';
+    public const TYPE_ARRAY = 'array';
 
 
     public function __construct(private readonly MessageBusInterface $bus)

@@ -9,7 +9,7 @@ use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Messenger\Stamp\ValidationStamp;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class ValidationMiddleware implements MiddlewareInterface
+final readonly class ValidationMiddleware implements MiddlewareInterface
 {
     private ValidatorInterface $validator;
 

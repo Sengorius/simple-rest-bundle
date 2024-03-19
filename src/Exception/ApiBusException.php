@@ -7,7 +7,8 @@ use Throwable;
 
 class ApiBusException extends RuntimeException
 {
-    const EXCEPTION_CODE = 331;
+    public const EXCEPTION_CODE = 331;
+
 
     public function __construct(string $message, Throwable|null $previous = null)
     {

@@ -8,9 +8,9 @@ use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class GrantingMiddleware implements MiddlewareInterface
+final readonly class GrantingMiddleware implements MiddlewareInterface
 {
-    public function __construct(private readonly AuthorizationCheckerInterface $authChecker, private readonly bool $throws = true)
+    public function __construct(private AuthorizationCheckerInterface $authChecker, private bool $throws = true)
     {
     }
 

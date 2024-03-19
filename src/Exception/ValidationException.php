@@ -13,8 +13,8 @@ class ValidationException extends RuntimeException
 {
     use ValidationPreparationTrait;
 
-    const VALIDATION_ROOT_KEY = 'root';
-    const EXCEPTION_CODE = 334;
+    public const VALIDATION_ROOT_KEY = 'root';
+    public const EXCEPTION_CODE = 334;
 
     private object $entity;
     private ConstraintViolationListInterface $violations;
@@ -22,7 +22,11 @@ class ValidationException extends RuntimeException
 
     public function __construct(object $entity, ConstraintViolationListInterface $violations, Throwable|null $previous = null)
     {
-        parent::__construct(sprintf('Validation for object "%s" has failed!', get_class($entity)), self::EXCEPTION_CODE, $previous);
+        parent::__construct(
+            sprintf('Validation for object "%s" has failed!', get_class($entity)),
+            self::EXCEPTION_CODE,
+            $previous
+        );
 
         $this->violations = $violations;
         $this->entity = $entity;

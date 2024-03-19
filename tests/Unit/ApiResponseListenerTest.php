@@ -14,7 +14,6 @@ use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyEntity;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorage;
@@ -64,7 +63,7 @@ class ApiResponseListenerTest extends TestCase
             self::$kernel,
             $this->createRequest(),
             HttpKernelInterface::MAIN_REQUEST,
-            new Response()
+            new \Symfony\Component\HttpFoundation\Response()
         );
 
         static::expectException(LogicException::class);
