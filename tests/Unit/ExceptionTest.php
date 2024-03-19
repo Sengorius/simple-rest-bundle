@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiBusException;
+use SkriptManufaktur\SimpleRestBundle\Exception\ApiNotFoundException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ValidationException;
@@ -32,6 +33,18 @@ class ExceptionTest extends TestCase
         $previousException = new InvalidArgumentException();
         $exception = new ApiProcessException('A Test has failed', $previousException);
         $code = 332;
+
+        static::assertInstanceOf(RuntimeException::class, $exception);
+        static::assertSame('A Test has failed', $exception->getMessage());
+        static::assertSame($code, $exception->getCode());
+        static::assertSame($previousException, $exception->getPrevious());
+    }
+
+    public function testApiNotFoundException(): void
+    {
+        $previousException = new InvalidArgumentException();
+        $exception = new ApiNotFoundException('A Test has failed', $previousException);
+        $code = 404;
 
         static::assertInstanceOf(RuntimeException::class, $exception);
         static::assertSame('A Test has failed', $exception->getMessage());

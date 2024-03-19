@@ -6,6 +6,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiResponse;
+use SkriptManufaktur\SimpleRestBundle\Exception\ApiNotFoundException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ValidationException;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Messenger\Envelope;
@@ -200,6 +202,44 @@ class ApiResponseListenerTest extends TestCase
 
         static::assertInstanceOf(ApiResponse::class, $response);
         static::assertInstanceOf(NonUniqueResultException::class, $response->getThrowable());
+        static::assertSame('This is my error!', $response->getData()['message']);
+        static::assertSame(404, $response->getStatusCode());
+    }
+
+    public function testNotFoundHttpExceptionFormatting(): void
+    {
+        $event = new ExceptionEvent(
+            self::$kernel,
+            $this->createRequest(),
+            HttpKernelInterface::MAIN_REQUEST,
+            new NotFoundHttpException('This is my error!')
+        );
+
+        self::$listener->formatException($event);
+
+        $response = $event->getResponse();
+
+        static::assertInstanceOf(ApiResponse::class, $response);
+        static::assertInstanceOf(NotFoundHttpException::class, $response->getThrowable());
+        static::assertSame('This is my error!', $response->getData()['message']);
+        static::assertSame(404, $response->getStatusCode());
+    }
+
+    public function testApiNotFoundExceptionFormatting(): void
+    {
+        $event = new ExceptionEvent(
+            self::$kernel,
+            $this->createRequest(),
+            HttpKernelInterface::MAIN_REQUEST,
+            new ApiNotFoundException('This is my error!')
+        );
+
+        self::$listener->formatException($event);
+
+        $response = $event->getResponse();
+
+        static::assertInstanceOf(ApiResponse::class, $response);
+        static::assertInstanceOf(ApiNotFoundException::class, $response->getThrowable());
         static::assertSame('This is my error!', $response->getData()['message']);
         static::assertSame(404, $response->getStatusCode());
     }

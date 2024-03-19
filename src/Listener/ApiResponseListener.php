@@ -6,6 +6,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use LogicException;
 use SkriptManufaktur\SimpleRestBundle\Component\ApiResponse;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiBusException;
+use SkriptManufaktur\SimpleRestBundle\Exception\ApiNotFoundException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiProcessException;
 use SkriptManufaktur\SimpleRestBundle\Exception\ValidationException;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -129,6 +131,8 @@ class ApiResponseListener
                 $this->fetchValidationException($response, $exception);
                 break;
 
+            case $exception instanceof NotFoundHttpException:
+            case $exception instanceof ApiNotFoundException:
             case $exception instanceof NonUniqueResultException:
                 $response->setStatusCode(Response::HTTP_NOT_FOUND);
                 break;
