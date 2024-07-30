@@ -51,7 +51,7 @@ class RoleService extends RoleHierarchy
      * Find out, if a user has one or more specific roles or at least one of them
      *
      * @param UserInterface         $user
-     * @param string[]|BackedEnum[] $roles
+     * @param (string|BackedEnum)[] $roles
      * @param string                $strategy
      *
      * @return bool
@@ -73,7 +73,8 @@ class RoleService extends RoleHierarchy
 
         // cast any role to string, in case the old Role class is used
         $userRoles = array_map(
-            fn (string|BackedEnum $role): string => $role instanceof BackedEnum ? $role->value : (string) $role,
+            // @phpstan-ignore-next-line
+            fn (BackedEnum|string $role): string => $role instanceof BackedEnum ? $role->value : (string) $role,
             $user->getRoles()
         );
 
