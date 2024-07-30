@@ -2,7 +2,7 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Normalizer;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
@@ -65,7 +65,7 @@ trait SerializerMockingTrait
 
     private function createManagerRegistry(string $hydratingMethod, string $className, callable $repoCallback): ManagerRegistry
     {
-        $repository = $this->getMockBuilder(ServiceEntityRepository::class)
+        $repository = $this->getMockBuilder(EntityRepository::class)
             ->disableOriginalConstructor()
             ->disableOriginalClone()
             ->disableArgumentCloning()
