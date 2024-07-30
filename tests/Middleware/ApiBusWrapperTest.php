@@ -248,6 +248,37 @@ class ApiBusWrapperTest extends TestCase
         $abw->checkAllMessageResults($envelope, [ApiBusWrapper::TYPE_ARRAY]);
     }
 
+    public function testCheckMessageResultObjectWithProxyClass(): void
+    {
+        $message = new \Proxies\__CG__\SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage('Hey!');
+        $abw = $this->createApiBusWrapper($message);
+        $envelope = new Envelope($message, [
+            new HandledStamp($message, 'test_handler'),
+        ]);
+        $result = $abw->checkMessageResult($envelope, [DummyMessage::class]);
+
+        static::assertInstanceOf(ApiBusWrapper::class, $abw);
+        static::assertInstanceOf(\Proxies\__CG__\SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage::class, $result);
+        static::assertSame($message, $result);
+    }
+
+    public function testCheckMessageResultWithProxyClassNotAllowed(): void
+    {
+        static::expectException(ApiBusException::class);
+        static::expectExceptionCode(331);
+        static::expectExceptionMessage(
+            'Message "Proxies\__CG__\SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage" did not '
+            .'have a stamp with expected value within types [SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage]!'
+        );
+
+        $message = new \Proxies\__CG__\SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage('Hey!');
+        $abw = $this->createApiBusWrapper($message);
+        $envelope = new Envelope($message, [
+            new HandledStamp($message, 'test_handler'),
+        ]);
+        $abw->checkMessageResult($envelope, [DummyMessage::class], false);
+    }
+
     private function createApiBusWrapper(object $message, array $stamps = []): ApiBusWrapper
     {
         $envelope = Envelope::wrap($message, $stamps);

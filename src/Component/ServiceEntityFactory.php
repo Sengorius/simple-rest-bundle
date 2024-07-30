@@ -4,15 +4,15 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use RuntimeException;
-use function get_class;
 
 class ServiceEntityFactory extends ServiceEntityRepository
 {
+    use DoctrineTransformerTrait;
+
     public const FILTER_EXACT = 'filter_exact';
     public const FILTER_START = 'filter_start';
     public const FILTER_END = 'filter_end';
@@ -50,7 +50,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     {
         $em = $this->getEntityManager();
 
-        if (!$em->contains($data) || $this->isDeferredExplicit($data)) {
+        if (!$em->contains($data) || $this->isDeferredExplicit($em, $data)) {
             $em->persist($data);
         }
 
@@ -115,56 +115,6 @@ class ServiceEntityFactory extends ServiceEntityRepository
         $this->flush();
 
         return $this;
-    }
-
-    /**
-     * Checks if doctrine does not manage data automatically.
-     *
-     * @param object $data
-     *
-     * @return bool
-     */
-    protected function isDeferredExplicit(object $data): bool
-    {
-        $realClassName = $this->getRealClassName(get_class($data));
-        $classMetadata = $this->getEntityManager()->getClassMetadata($realClassName);
-
-        if ($classMetadata instanceof ClassMetadata && method_exists($classMetadata, 'isChangeTrackingDeferredExplicit')) {
-            return $classMetadata->isChangeTrackingDeferredExplicit();
-        }
-
-        return false;
-    }
-
-    /**
-     * Get the real class name of a class name that could be a proxy.
-     *
-     * @param string $className
-     *
-     * @return string
-     */
-    protected function getRealClassName(string $className): string
-    {
-        $positionCg = strrpos($className, '\\__CG__\\');
-        $positionPm = strrpos($className, '\\__PM__\\');
-
-        // __CG__: Doctrine Common Marker for Proxy (ODM < 2.0 and ORM < 3.0)
-        // __PM__: Ocramius Proxy Manager (ODM >= 2.0)
-        if (false === $positionCg && false === $positionPm) {
-            return $className;
-        }
-
-        if (false !== $positionCg) {
-            return substr($className, $positionCg + 8);
-        }
-
-        $className = ltrim($className, '\\');
-
-        return substr(
-            $className,
-            8 + $positionPm,
-            strrpos($className, '\\') - ($positionPm + 8)
-        );
     }
 
     /**

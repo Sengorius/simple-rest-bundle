@@ -42,7 +42,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "SkriptManufaktur\\SimpleRestBundle\\Tests\\": "tests/"
+            "SkriptManufaktur\\SimpleRestBundle\\Tests\\": "tests/",
+            "Proxies\\__CG__\\SkriptManufaktur\\SimpleRestBundle\\Tests\\Fixtures\\": "tests/Proxy"
         }
     },
     "scripts": {

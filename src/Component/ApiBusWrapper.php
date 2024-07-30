@@ -12,6 +12,8 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
 
 class ApiBusWrapper
 {
+    use DoctrineTransformerTrait;
+
     public const TYPE_NULL = 'null';
     public const TYPE_BOOL = 'bool';
     public const TYPE_INT = 'int';
@@ -42,6 +44,7 @@ class ApiBusWrapper
      *
      * @param Envelope $envelope      The envelope after sending the message via MessageBus
      * @param array    $expectedTypes An array of types defining the expected return types from a handler
+     * @param bool     $allowProxy    Also allow Doctrine Proxy classes like "Proxies\__CG__\App\Entity\..."
      *
      * @return mixed|null Returns values with following priority
      *     - false - if the handler did not provide a result, the test on expected types failed or the message is sent to asynchronous transport
@@ -49,7 +52,7 @@ class ApiBusWrapper
      *
      * @throws ApiBusException
      */
-    public function checkMessageResult(Envelope $envelope, array $expectedTypes = []): mixed
+    public function checkMessageResult(Envelope $envelope, array $expectedTypes = [], bool $allowProxy = true): mixed
     {
         // stop here, if the message will be sent to an asynchronous transport
         if (!$this->checkForSentStatus($envelope)) {
@@ -67,7 +70,7 @@ class ApiBusWrapper
         // test the result against the expected types
         $result = $stamp->getResult();
 
-        if (!$this->expectedTypesValid($result, $expectedTypes)) {
+        if (!$this->expectedTypesValid($result, $expectedTypes, $allowProxy)) {
             throw new ApiBusException(sprintf(
                 'Message "%s" did not have a stamp with expected value within types [%s]!',
                 get_class($envelope->getMessage()),
@@ -83,6 +86,7 @@ class ApiBusWrapper
      *
      * @param Envelope $envelope      The envelope after sending the message via MessageBus
      * @param array    $expectedTypes An array of types defining the expected return types from a handler
+     * @param bool     $allowProxy    Also allow Doctrine Proxy classes like "Proxies\__CG__\App\Entity\..."
      *
      * @return HandledStamp[]|false Returns values with following priority
      *     - false - if the test on expected types failed or the message is sent to asynchronous transport
@@ -90,7 +94,7 @@ class ApiBusWrapper
      *
      * @throws ApiBusException
      */
-    public function checkAllMessageResults(Envelope $envelope, array $expectedTypes = []): array|false
+    public function checkAllMessageResults(Envelope $envelope, array $expectedTypes = [], bool $allowProxy = true): array|false
     {
         // stop here, if the message will be sent to an asynchronous transport
         if (!$this->checkForSentStatus($envelope)) {
@@ -104,7 +108,7 @@ class ApiBusWrapper
         /** @var HandledStamp $stamp */
         foreach ($stamps as $stamp) {
             // test the result against the expected types
-            if (!$this->expectedTypesValid($stamp->getResult(), $expectedTypes)) {
+            if (!$this->expectedTypesValid($stamp->getResult(), $expectedTypes, $allowProxy)) {
                 throw new ApiBusException(sprintf(
                     'Message "%s" did not have a stamp with expected value within types [%s]!',
                     get_class($envelope->getMessage()),
@@ -123,12 +127,13 @@ class ApiBusWrapper
      *
      * @param Envelope $envelope      The envelope after sending the message via MessageBus
      * @param array    $expectedTypes An array of types defining the expected return types from a handler
+     * @param bool     $allowProxy    Also allow Doctrine Proxy classes like "Proxies\__CG__\App\Entity\..."
      *
      * @return HandledStamp[]
      *
      * @throws ApiBusException
      */
-    public function filterAllMessageResults(Envelope $envelope, array $expectedTypes = []): array
+    public function filterAllMessageResults(Envelope $envelope, array $expectedTypes = [], bool $allowProxy = true): array
     {
         // stop here, if the message will be sent to an asynchronous transport
         if (!$this->checkForSentStatus($envelope)) {
@@ -140,7 +145,7 @@ class ApiBusWrapper
 
         return array_filter(
             $handledStamps,
-            fn (HandledStamp $stamp) => $this->expectedTypesValid($stamp->getResult(), $expectedTypes)
+            fn (HandledStamp $stamp) => $this->expectedTypesValid($stamp->getResult(), $expectedTypes, $allowProxy)
         );
     }
 
@@ -149,12 +154,13 @@ class ApiBusWrapper
      *
      * @param mixed $result
      * @param array $expectedTypes
+     * @param bool  $allowProxy
      *
      * @return bool
      *
      * @throws ApiBusException
      */
-    private function expectedTypesValid(mixed $result, array $expectedTypes): bool
+    private function expectedTypesValid(mixed $result, array $expectedTypes, bool $allowProxy): bool
     {
         // if nothing is expected, anything is fine
         if (empty($expectedTypes)) {
@@ -175,8 +181,9 @@ class ApiBusWrapper
         $isStringType = is_string($result) && in_array(self::TYPE_STRING, $expectedTypes);
         $isArrayType = is_array($result) && in_array(self::TYPE_ARRAY, $expectedTypes);
         $isObjectType = is_object($result) && in_array(get_class($result), $expectedTypes);
+        $isProxy = $allowProxy && is_object($result) && in_array($this->getRealClassName($result), $expectedTypes);
 
-        return $isNullType || $isBoolType || $isObjectType || $isArrayType || $isIntType || $isDoubleType || $isStringType;
+        return $isNullType || $isBoolType || $isObjectType || $isProxy || $isArrayType || $isIntType || $isDoubleType || $isStringType;
     }
 
     /**
