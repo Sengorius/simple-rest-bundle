@@ -17,7 +17,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "^2.10",
-        "doctrine/orm": "^2.16",
+        "doctrine/orm": "^2.16|^3.1",
         "symfony/messenger": "^6.4|^7.0",
         "symfony/options-resolver": "^6.4|^7.0",
         "symfony/property-access": "^6.4|^7.0",

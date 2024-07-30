@@ -4,7 +4,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -129,7 +129,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
         $realClassName = $this->getRealClassName(get_class($data));
         $classMetadata = $this->getEntityManager()->getClassMetadata($realClassName);
 
-        if ($classMetadata instanceof ClassMetadataInfo && method_exists($classMetadata, 'isChangeTrackingDeferredExplicit')) {
+        if ($classMetadata instanceof ClassMetadata && method_exists($classMetadata, 'isChangeTrackingDeferredExplicit')) {
             return $classMetadata->isChangeTrackingDeferredExplicit();
         }
 
