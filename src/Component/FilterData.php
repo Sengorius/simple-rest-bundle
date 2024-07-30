@@ -24,9 +24,13 @@ final class FilterData implements Serializable
     private OptionsResolver $searchResolver;
     private OptionsResolver $sortResolver;
     private string|null $filterInterface = null;
-    private array $search = [];
-    private array $sort = [];
     private bool $booted = false;
+
+    /** @var array<string, int|bool|string|string[]|null> */
+    private array $search = [];
+
+    /** @var array<string, string|null> */
+    private array $sort = [];
 
 
     public function __construct()
@@ -178,10 +182,6 @@ final class FilterData implements Serializable
 
     public function boot(): self
     {
-        if ($this->booted) {
-            return $this;
-        }
-
         $searchResolver = clone $this->searchResolver;
         $sortResolver = clone $this->sortResolver;
 
@@ -194,7 +194,9 @@ final class FilterData implements Serializable
 
     public function __serialize(): array
     {
-        $this->boot();
+        if (!$this->booted) {
+            $this->boot();
+        }
 
         return [
             'search' => $this->getSearch(),
@@ -230,6 +232,10 @@ final class FilterData implements Serializable
 
     public function getSearch(string|null $key = null): array|string|int|bool|null
     {
+        if (!$this->booted) {
+            $this->boot();
+        }
+
         if (null !== $key) {
             if (!$this->searchResolver->hasDefault($key)) {
                 throw new ApiProcessException(sprintf('FilterData: Option "%s" is not configured!', $key));
@@ -247,6 +253,10 @@ final class FilterData implements Serializable
 
     public function getSorting(string|null $key = null): array|string|null
     {
+        if (!$this->booted) {
+            $this->boot();
+        }
+
         if (null !== $key) {
             if (!$this->sortResolver->hasDefault($key)) {
                 throw new ApiProcessException(sprintf('FilterData: Sorting "%s" is not configured!', $key));
@@ -264,6 +274,10 @@ final class FilterData implements Serializable
 
     public function getPage(): int
     {
+        if (!$this->booted) {
+            $this->boot();
+        }
+
         if (!isset($this->search['page'])) {
             throw new ApiProcessException('FilterData was not booted!');
         }

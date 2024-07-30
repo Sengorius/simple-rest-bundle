@@ -63,43 +63,10 @@ class FilterDataTest extends TestCase
 
         static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
-        static::assertEmpty($filter->getSearch());
+        static::assertNotEmpty($filter->getSearch());
         static::assertIsArray($filter->getSorting());
-        static::assertEmpty($filter->getSorting());
-
-        static::expectException(ApiProcessException::class);
-        static::expectExceptionMessage('FilterData was not booted!');
-        $filter->getSearch('name');
-    }
-
-    public function testUnbootedSortingData(): void
-    {
-        $filter = FilterData::createFromAttributes(DummyFilterObject::class);
-
-        static::assertInstanceOf(FilterData::class, $filter);
-        static::assertIsArray($filter->getSearch());
-        static::assertEmpty($filter->getSearch());
-        static::assertIsArray($filter->getSorting());
-        static::assertEmpty($filter->getSorting());
-
-        static::expectException(ApiProcessException::class);
-        static::expectExceptionMessage('FilterData was not booted!');
-        $filter->getSorting('rank');
-    }
-
-    public function testUnbootedFilterDataWithGetPage(): void
-    {
-        $filter = FilterData::createFromAttributes(DummyFilterObject::class);
-
-        static::assertInstanceOf(FilterData::class, $filter);
-        static::assertIsArray($filter->getSearch());
-        static::assertEmpty($filter->getSearch());
-        static::assertIsArray($filter->getSorting());
-        static::assertEmpty($filter->getSorting());
-
-        static::expectException(ApiProcessException::class);
-        static::expectExceptionMessage('FilterData was not booted!');
-        $filter->getPage();
+        static::assertNotEmpty($filter->getSorting());
+        static::assertNull($filter->getSearch('name'));
     }
 
     public function testSatisfiedFilterData(): void
