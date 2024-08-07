@@ -96,4 +96,24 @@ class ExceptionTest extends TestCase
         static::assertCount(1, $violations['name']);
         static::assertSame($expectedViolations, $violations);
     }
+
+    public function testSingleValidationException(): void
+    {
+        $entity = new stdClass();
+        $entity->id = 122;
+
+        $exception = ValidationException::fromSingle(new ConstraintViolation('Global error', '', [], $entity, '', null));
+        $violations = $exception->getStringifiedViolations();
+        $expectedViolations = [
+            'root' => [
+                'Global error',
+            ],
+        ];
+
+        static::assertInstanceOf(RuntimeException::class, $exception);
+        static::assertSame('Validation for object "stdClass" has failed!', $exception->getMessage());
+        static::assertSame(334, $exception->getCode());
+        static::assertSame('stdClass', $exception->getEntityClass());
+        static::assertSame($expectedViolations, $violations);
+    }
 }

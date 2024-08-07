@@ -5,6 +5,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Exception;
 use RuntimeException;
 use SkriptManufaktur\SimpleRestBundle\Validation\ValidationPreparationTrait;
 use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Throwable;
 use function get_class;
@@ -30,6 +31,11 @@ class ValidationException extends RuntimeException
 
         $this->violations = $violations;
         $this->entity = $entity;
+    }
+
+    public static function fromSingle(ConstraintViolationInterface $violation): self
+    {
+        return new self($violation->getRoot(), new ConstraintViolationList([$violation]));
     }
 
     public function getEntity(): object
