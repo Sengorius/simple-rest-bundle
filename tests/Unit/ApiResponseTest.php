@@ -117,6 +117,43 @@ class ApiResponseTest extends TestCase
         );
     }
 
+    public function testContraintViolationMerge(): void
+    {
+        $validation = '{"root":["Problem in root"],"name":["Problem with name"],"address":["Prob. with a","Prob. with b"],"items":["Some went wrong"]}';
+        $validationInput = [
+            '' => [
+                'Problem in root',
+            ],
+            'data[name]' => [
+                'Problem with name',
+            ],
+            'data[address]' => [
+                'Prob. with a',
+                'Prob. with b',
+            ],
+            'data[contact]' => [
+                '',
+            ],
+            'data[items][0]' => [
+                'Some went wrong',
+            ],
+        ];
+
+        $response = ApiResponse::create([], 400);
+
+        foreach ($validationInput as $propPath => $vi) {
+            $response->mergeValidationIssues($propPath, $vi);
+        }
+
+        static::assertInstanceOf(ApiResponse::class, $response);
+        static::assertSame(400, $response->getStatusCode());
+        static::assertSame([], $response->getData());
+        static::assertSame(
+            sprintf('{"data":[],"messages":{"success":[],"info":[],"warning":[],"error":[]},"validation":%s}', $validation),
+            $response->getContent()
+        );
+    }
+
     public function testThrowable(): void
     {
         $data = '{"message":"This is an error!","status":0,"code":5}';

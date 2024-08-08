@@ -74,6 +74,8 @@ class ExceptionTest extends TestCase
         $violationList = new ConstraintViolationList([
             new ConstraintViolation('Name not set', '', [], null, 'name', null),
             new ConstraintViolation('Global error', '', [], null, '', null),
+            new ConstraintViolation('Global address error', '', [], null, 'data[addresses]', null),
+            new ConstraintViolation('Local address error', '', [], null, 'data[addresses][0]', null),
         ]);
         $exception = new ValidationException($entity, $violationList, $previousException);
         $violations = $exception->getStringifiedViolations();
@@ -83,6 +85,10 @@ class ExceptionTest extends TestCase
             ],
             'name' => [
                 'Name not set',
+            ],
+            'addresses' => [
+                'Global address error',
+                'Local address error',
             ],
         ];
 
