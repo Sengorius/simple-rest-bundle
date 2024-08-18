@@ -4,6 +4,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -76,7 +77,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
      *
      * @return ServiceEntityFactory
      *
-     * @throws Exception
+     * @throws Exception|ORMException
      */
     protected function factoryRefresh(object $data): self
     {
@@ -90,7 +91,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
      *
      * @return ServiceEntityFactory
      *
-     * @throws Exception
+     * @throws Exception|ORMException
      */
     protected function factoryPersistAndFlush(object $data): self
     {
@@ -115,6 +116,40 @@ class ServiceEntityFactory extends ServiceEntityRepository
         $this->flush();
 
         return $this;
+    }
+
+    /**
+     * Adding a simple comparison to QueryBuilder
+     *
+     * @param QueryBuilder                $qb
+     * @param string                      $field The field's name to find in filter and match in database
+     * @param string|float|int|array|null $value
+     */
+    protected function addComparison(QueryBuilder $qb, string $field, string|float|int|array|null $value): void
+    {
+        // if nothing was passed, just return
+        if ('' === $value || 'null' === $value || null === $value) {
+            return;
+        }
+
+        $varName = $this->unfoldQueryField($field);
+        $parameterName = sprintf('%s_%s', str_replace(['.', ' '], '_', $field), $this->counter++);
+
+        if (is_array($value) && !empty($value)) {
+            $qb->andWhere(sprintf('%s IN (:%s)', $varName, $parameterName));
+            $qb->setParameter($parameterName, array_map(
+                fn (string|float|int $item): string|float|int => is_string($item) ? trim($item) : $item,
+                array_filter(
+                    $value,
+                    fn (string|float|int|null $item): bool => null !== $item && 'null' !== $item && '' !== $item
+                )
+            ));
+
+            return;
+        }
+
+        $qb->andWhere(sprintf('%s = :%s', $varName, $parameterName));
+        $qb->setParameter($parameterName, $value);
     }
 
     /**
@@ -170,7 +205,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     protected function addDateSearchTo(QueryBuilder $qb, string $field, string|array|null $value): void
     {
         // if nothing was passed, just return
-        if (empty($value)) {
+        if (is_array($value) && empty($value) || '' === $value || 'undefined' === $value) {
             return;
         }
 
@@ -184,7 +219,9 @@ class ServiceEntityFactory extends ServiceEntityRepository
 
         // when getting a string like ?date=2020-09-01, make it an equals comparison
         if (!$valueIsArray) {
-            $value['eq'][] = $value;
+            $value = [
+                'eq' => $value,
+            ];
         }
 
         // setup date controls from array
@@ -192,6 +229,11 @@ class ServiceEntityFactory extends ServiceEntityRepository
             $dates = is_array($datesArray) ? $datesArray : [$datesArray];
 
             foreach ($dates as $date) {
+                // catch missing values, probably from JS
+                if ('' === $date || 'undefined' === $date) {
+                    continue;
+                }
+
                 // we have a special case with NULL in PostgreSQL
                 if ('null' === $date || null === $date) {
                     $qb->andWhere(sprintf('%s IS NULL', $varName));
@@ -215,16 +257,94 @@ class ServiceEntityFactory extends ServiceEntityRepository
     }
 
     /**
+     * Adds an ->andWhere() statement for numeric search in a QueryBuilder
+     * Use like ?priority[gte]=1&priority[lte]=4
+     *
+     * @param QueryBuilder                $qb
+     * @param string                      $field
+     * @param string|int|float|array|null $value
+     * @param bool                        $allowNull
+     *
+     * @throws Exception
+     */
+    protected function addNumberSearchTo(QueryBuilder $qb, string $field, string|int|float|array|null $value, bool $allowNull = false): void
+    {
+        $valueIsArray = is_array($value);
+
+        // if nothing was passed, just return
+        if (!$allowNull && null === $value || $valueIsArray && empty($value) || '' === $value || 'undefined' === $value) {
+            return;
+        }
+
+        $varName = $this->unfoldQueryField($field);
+
+        // error on falsy value
+        if ($valueIsArray && !isset($value['eq']) && !isset($value['gt']) && !isset($value['lt']) && !isset($value['gte']) && !isset($value['lte'])) {
+            throw new RuntimeException('Searching a number has to follow the format "?number[f]=value", where f is one of [eq, gt, lt, gte, lte].');
+        }
+
+        // when getting a string like ?number=5, make it an equals comparison
+        if (!$valueIsArray) {
+            $value = [
+                'eq' => $value,
+            ];
+        }
+
+        // setup date controls from array
+        foreach ($value as $operator => $numbersArray) {
+            $numbers = is_array($numbersArray) ? $numbersArray : [$numbersArray];
+
+            foreach ($numbers as $num) {
+                if ('' === $num || 'undefined' === $num) {
+                    continue;
+                }
+
+                // we have a special case with NULL in PostgreSQL, if we allow null
+                if ($allowNull && (null === $num || 'null' === $num)) {
+                    $qb->andWhere(sprintf('%s IS NULL', $varName));
+                    continue;
+                }
+
+                if (is_string($num)) {
+                    $num = str_replace(',', '.', $num);
+                }
+
+                // catch invalid values
+                if (!is_numeric($num)) {
+                    continue;
+                }
+
+                if (is_string($num)) {
+                    $num = str_contains($num, '.') ? ((float) $num) : ((int) $num);
+                }
+
+                $parameterName = sprintf('%s_%s_%s', str_replace(['.', ' '], '_', $field), $operator, $this->counter++);
+                $sign = match ($operator) {
+                    'gte' => '>=',
+                    'lte' => '<=',
+                    'gt' => '>',
+                    'lt' => '<',
+                    default => '=',
+                };
+
+                $qb->andWhere(sprintf('%s %s :%s', $varName, $sign, $parameterName));
+                $qb->setParameter($parameterName, $num);
+            }
+        }
+    }
+
+    /**
      * Adds an ->andWhere() statement for boolean search in a QueryBuilder
      *
-     * @param QueryBuilder    $qb
-     * @param string          $field
-     * @param bool|array|null $value
+     * @param QueryBuilder           $qb
+     * @param string                 $field
+     * @param string|bool|array|null $value
+     * @param bool                   $allowNull
      */
-    protected function addBooleanSearchTo(QueryBuilder $qb, string $field, bool|array|null $value): void
+    protected function addBooleanSearchTo(QueryBuilder $qb, string $field, string|bool|array|null $value, bool $allowNull = false): void
     {
         // if nothing was passed or is given falsy, just return
-        if (is_null($value) || is_array($value) && empty($value)) {
+        if (!$allowNull && is_null($value) || is_array($value) && empty($value) || '' === $value || 'undefined' === $value) {
             return;
         }
 
@@ -232,13 +352,24 @@ class ServiceEntityFactory extends ServiceEntityRepository
             $value = reset($value);
         }
 
+        if (!$allowNull && is_null($value) || '' === $value || 'undefined' === $value) {
+            return;
+        }
+
         $parameterName = sprintf('%s_%s', str_replace(['.', ' '], '_', $field), $this->counter++);
         $varName = $this->unfoldQueryField($field);
 
+        // allowing to test null
+        if ($allowNull && (null === $value || 'null' === $value)) {
+            $qb->andWhere(sprintf('%s IS NULL', $varName));
+
+            return;
+        }
+
         // if we got a string
-        if (in_array(strtolower($value), ['false', 'f'])) {
+        if (is_string($value) && in_array(strtolower($value), ['false', 'f'])) {
             $value = 0;
-        } elseif (in_array(strtolower($value), ['true', 't'])) {
+        } elseif (is_string($value) && in_array(strtolower($value), ['true', 't'])) {
             $value = 1;
 
         // try casting it to integer, then to bool -> 2 possibilities left
