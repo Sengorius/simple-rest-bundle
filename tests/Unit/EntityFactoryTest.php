@@ -137,7 +137,7 @@ class EntityFactoryTest extends TestCase
         $wrapper = $this->createFactoryWrapper();
         $result = 'SELECT t FROM DummyUser t WHERE t.created = :created_eq_1';
 
-        $wrapper->addDateSearchProxy($qb, 'created', '2024-08-15T20:20:00');
+        $wrapper->addDateSearchProxy($qb, 'created', '2024-08-15T20:20:00', false);
 
         static::assertInstanceOf(QueryBuilder::class, $qb);
         static::assertIsString($qb->getDQL());
@@ -152,9 +152,9 @@ class EntityFactoryTest extends TestCase
         $wrapper = $this->createFactoryWrapper();
         $result = 'SELECT t FROM DummyUser t WHERE t.created IS NULL AND t.deleted IS NULL';
 
-        $wrapper->addDateSearchProxy($qb, 'created', 'null');
-        $wrapper->addDateSearchProxy($qb, 'deleted', null);
-        $wrapper->addDateSearchProxy($qb, 'nonsense', 'undefined');
+        $wrapper->addDateSearchProxy($qb, 'created', 'null', true);
+        $wrapper->addDateSearchProxy($qb, 'deleted', null, true);
+        $wrapper->addDateSearchProxy($qb, 'nonsense', 'undefined', false);
 
         static::assertInstanceOf(QueryBuilder::class, $qb);
         static::assertIsString($qb->getDQL());
@@ -169,8 +169,8 @@ class EntityFactoryTest extends TestCase
         $result = 'SELECT t FROM DummyUser t WHERE t.created >= :created_gte_1 AND t.created <= :created_lte_2 '
             .'AND t.deleted IS NULL';
 
-        $wrapper->addDateSearchProxy($qb, 'created', ['gte' => '2024-08-15T20:20:00', 'lte' => ['2024-08-20T10:30:00']]);
-        $wrapper->addDateSearchProxy($qb, 'deleted', ['eq' => [null]]);
+        $wrapper->addDateSearchProxy($qb, 'created', ['gte' => '2024-08-15T20:20:00', 'lte' => ['2024-08-20T10:30:00']], true);
+        $wrapper->addDateSearchProxy($qb, 'deleted', ['eq' => [null]], true);
 
         static::assertInstanceOf(QueryBuilder::class, $qb);
         static::assertIsString($qb->getDQL());
@@ -188,10 +188,11 @@ class EntityFactoryTest extends TestCase
         $wrapper = $this->createFactoryWrapper();
         $result = 'SELECT t FROM DummyUser t';
 
-        $wrapper->addDateSearchProxy($qb, 'created', '');
-        $wrapper->addDateSearchProxy($qb, 'deleted', []);
-        $wrapper->addDateSearchProxy($qb, 'nonsense', 'undefined');
-        $wrapper->addDateSearchProxy($qb, 'dueDate', ['gt' => 'undefined']);
+        $wrapper->addDateSearchProxy($qb, 'created', '', false);
+        $wrapper->addDateSearchProxy($qb, 'deleted', [], false);
+        $wrapper->addDateSearchProxy($qb, 'nonsense', 'undefined', false);
+        $wrapper->addDateSearchProxy($qb, 'dueDate', ['gt' => 'undefined'], false);
+        $wrapper->addDateSearchProxy($qb, 'dueTime', null, false);
 
         static::assertInstanceOf(QueryBuilder::class, $qb);
         static::assertIsString($qb->getDQL());
@@ -366,9 +367,9 @@ class EntityFactoryTest extends TestCase
                 $this->addStringSearchTo($qb, $field, $value, $filterType, $caseSensitive);
             }
 
-            public function addDateSearchProxy(QueryBuilder $qb, string $field, string|array|null $value): void
+            public function addDateSearchProxy(QueryBuilder $qb, string $field, string|array|null $value, bool $allowNull): void
             {
-                $this->addDateSearchTo($qb, $field, $value);
+                $this->addDateSearchTo($qb, $field, $value, $allowNull);
             }
 
             public function addNumberSearchProxy(QueryBuilder $qb, string $field, string|int|float|array|null $value, bool $allowNull): void

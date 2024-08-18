@@ -199,13 +199,14 @@ class ServiceEntityFactory extends ServiceEntityRepository
      * @param QueryBuilder      $qb
      * @param string            $field
      * @param string|array|null $value
+     * @param bool              $allowNull
      *
      * @throws Exception
      */
-    protected function addDateSearchTo(QueryBuilder $qb, string $field, string|array|null $value): void
+    protected function addDateSearchTo(QueryBuilder $qb, string $field, string|array|null $value, bool $allowNull = false): void
     {
         // if nothing was passed, just return
-        if (is_array($value) && empty($value) || '' === $value || 'undefined' === $value) {
+        if (!$allowNull && null === $value || is_array($value) && empty($value) || '' === $value || 'undefined' === $value) {
             return;
         }
 
@@ -229,6 +230,11 @@ class ServiceEntityFactory extends ServiceEntityRepository
             $dates = is_array($datesArray) ? $datesArray : [$datesArray];
 
             foreach ($dates as $date) {
+                // continue if null not allowed here
+                if (!$allowNull && (null === $date || 'null' === $date)) {
+                    continue;
+                }
+
                 // catch missing values, probably from JS
                 if ('' === $date || 'undefined' === $date) {
                     continue;
