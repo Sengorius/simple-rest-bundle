@@ -41,7 +41,17 @@ abstract class AbstractApiHandlerFactory
     {
         $context = [
             AbstractNormalizer::GROUPS => $groups,
-            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => fn ($object, $format, $context) => $object->getId(),
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object, $format, $context): string|int|null {
+                if (method_exists($object, 'getUuid')) {
+                    return $object->getUuid();
+                }
+
+                if (method_exists($object, 'getId')) {
+                    return $object->getId();
+                }
+
+                return null;
+            },
         ];
 
         try {
