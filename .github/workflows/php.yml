@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Setup PHP 8.2
+    - name: Setup PHP 8.4
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.2'
+        php-version: '8.4'
         tools: phpcs, phpstan, phpunit
 
     - uses: actions/checkout@v4
