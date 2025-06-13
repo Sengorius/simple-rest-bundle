@@ -9,6 +9,7 @@ use SkriptManufaktur\SimpleRestBundle\Voter\GrantingStampInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class DefaultVoter extends Voter
@@ -18,7 +19,7 @@ class DefaultVoter extends Voter
         return in_array($attribute, ['access', 'edit'], true);
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, Vote|null $vote = null): bool
     {
         if (!is_array($subject)) {
             throw new Exception('System Error: Subject for GrantingVoter is not an array!');

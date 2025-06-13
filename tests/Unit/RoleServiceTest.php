@@ -101,7 +101,7 @@ class RoleServiceTest extends TestCase
     public function testTokenHasEnumRoles(): void
     {
         $user = new DummyUser('Dummy', [DummyUserRoles::ADMIN]);
-        $token = new PreAuthenticatedToken($user, 'api', $user->getRoles());
+        $token = new PreAuthenticatedToken($user, 'api', array_map(fn (DummyUserRoles $r) => $r->value, $user->getRoles()));
 
         static::assertTrue($this->roleService->tokenHasRoles($token, [DummyUserRoles::USER, DummyUserRoles::DIRECTOR]));
         static::assertTrue($this->roleService->tokenHasRoles($token, [DummyUserRoles::MANAGER, DummyUserRoles::DIRECTOR]));

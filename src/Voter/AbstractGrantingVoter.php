@@ -4,6 +4,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Voter;
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use TypeError;
 
@@ -13,11 +14,16 @@ abstract class AbstractGrantingVoter implements VoterInterface
      * @param TokenInterface $token
      * @param mixed          $subject
      * @param array          $attributes
+     * @param Vote|null      $vote
      *
      * @return int
      */
-    public function vote(TokenInterface $token, mixed $subject, array $attributes): int
+    public function vote(TokenInterface $token, mixed $subject, array $attributes, Vote|null $vote = null): int
     {
+        if (null !== $vote) {
+            $vote->result = self::ACCESS_ABSTAIN;
+        }
+
         // we don't actually care about an attribute, as it is store in the stamp, anyway
         if (!$this->validateSubject($subject)) {
             return self::ACCESS_ABSTAIN;
@@ -36,9 +42,17 @@ abstract class AbstractGrantingVoter implements VoterInterface
             }
         }
 
-        if ($this->voteOnEnvelope($stamp, $envelope, $token)) {
+        if ($this->voteOnEnvelope($stamp, $envelope, $token, $vote)) {
+            if (null !== $vote) {
+                $vote->result = self::ACCESS_GRANTED;
+            }
+
             // grant access as soon as at least one attribute returns a positive response
             return self::ACCESS_GRANTED;
+        }
+
+        if (null !== $vote) {
+            $vote->result = self::ACCESS_DENIED;
         }
 
         // default is to deny access
@@ -62,10 +76,11 @@ abstract class AbstractGrantingVoter implements VoterInterface
      * @param GrantingStampInterface $stamp
      * @param Envelope               $envelope
      * @param TokenInterface         $token
+     * @param Vote|null              $vote
      *
      * @return bool
      */
-    abstract protected function voteOnEnvelope(GrantingStampInterface $stamp, Envelope $envelope, TokenInterface $token): bool;
+    abstract protected function voteOnEnvelope(GrantingStampInterface $stamp, Envelope $envelope, TokenInterface $token, Vote|null $vote): bool;
 
     /**
      * @param mixed $subject
