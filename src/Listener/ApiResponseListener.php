@@ -59,7 +59,6 @@ final readonly class ApiResponseListener
             return;
         }
 
-        /** @var ApiResponse $response */
         $response = $event->getResponse();
 
         if (!$response instanceof ApiResponse) {
@@ -89,7 +88,6 @@ final readonly class ApiResponseListener
             return;
         }
 
-        /** @var ApiResponse $response */
         $response = $event->getResponse();
 
         if (!$response instanceof ApiResponse) {

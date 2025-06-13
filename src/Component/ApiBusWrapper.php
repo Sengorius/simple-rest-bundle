@@ -4,6 +4,7 @@ namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use SkriptManufaktur\SimpleRestBundle\Exception\ApiBusException;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
@@ -33,6 +34,8 @@ class ApiBusWrapper
      * @param StampInterface[] $stamps
      *
      * @return Envelope
+     *
+     * @throws ExceptionInterface
      */
     public function dispatch(object $message, array $stamps = []): Envelope
     {

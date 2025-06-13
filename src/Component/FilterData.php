@@ -220,7 +220,7 @@ final class FilterData implements Serializable
         }
     }
 
-    public function serialize(): string|null
+    public function serialize(): string|false
     {
         return json_encode($this->__serialize());
     }

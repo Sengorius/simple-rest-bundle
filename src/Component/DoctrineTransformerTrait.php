@@ -3,7 +3,6 @@
 namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use function get_class;
 use function is_object;
 use function ltrim;
@@ -25,11 +24,7 @@ trait DoctrineTransformerTrait
         $realClassName = $this->getRealClassName($data);
         $classMetadata = $entityManager->getClassMetadata($realClassName);
 
-        if ($classMetadata instanceof ClassMetadata && method_exists($classMetadata, 'isChangeTrackingDeferredExplicit')) {
-            return $classMetadata->isChangeTrackingDeferredExplicit();
-        }
-
-        return false;
+        return $classMetadata->isChangeTrackingDeferredExplicit();
     }
 
     /**

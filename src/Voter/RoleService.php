@@ -124,7 +124,6 @@ class RoleService extends RoleHierarchy
      */
     public function tokenHasRoles(TokenInterface $token, array $roles, string $strategy = self::STRATEGY_AND): bool
     {
-        /** @var UserInterface $user */
         $user = $token->getUser();
 
         if (!$user instanceof UserInterface) {
