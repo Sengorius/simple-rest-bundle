@@ -13,7 +13,7 @@ abstract class AbstractGrantingVoter implements VoterInterface
     /**
      * @param TokenInterface $token
      * @param mixed          $subject
-     * @param array          $attributes
+     * @param array<mixed>   $attributes
      * @param Vote|null      $vote
      *
      * @return int

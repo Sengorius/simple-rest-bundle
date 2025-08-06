@@ -33,15 +33,15 @@ abstract class AbstractApiHandlerFactory
      * @param object   $entity
      * @param string[] $groups
      *
-     * @return array
+     * @return array<mixed>|\ArrayObject<int, null>|bool|float|int|string|null
      *
      * @throws ApiProcessException
      */
-    protected function normalize(object $entity, array $groups = []): array
+    protected function normalize(object $entity, array $groups = []): array|\ArrayObject|bool|float|int|string|null
     {
         $context = [
             AbstractNormalizer::GROUPS => $groups,
-            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object, $format, $context): string|int|null {
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function (object $object, string|null $format, array $context): string|int|null {
                 if (method_exists($object, 'getUuid')) {
                     return $object->getUuid();
                 }
@@ -64,11 +64,11 @@ abstract class AbstractApiHandlerFactory
     /**
      * Simple mapper from array to entity (by class)
      *
-     * @param array       $data
-     * @param string      $entityClass
-     * @param object|null $populated
-     * @param string[]    $groups
-     * @param string[]    $entityClassMap
+     * @param array<mixed> $data
+     * @param string       $entityClass
+     * @param object|null  $populated
+     * @param string[]     $groups
+     * @param string[]     $entityClassMap
      *
      * @return object
      *

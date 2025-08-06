@@ -10,15 +10,20 @@ use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use RuntimeException;
 
+/**
+ * @template T of object
+ *
+ * @template-extends ServiceEntityRepository<T>
+ */
 class ServiceEntityFactory extends ServiceEntityRepository
 {
     use DoctrineTransformerTrait;
 
-    public const FILTER_EXACT = 'filter_exact';
-    public const FILTER_START = 'filter_start';
-    public const FILTER_END = 'filter_end';
-    public const FILTER_PARTIAL = 'filter_partial';
-    public const FILTER_WORD_START = 'filter_word_start';
+    public const string FILTER_EXACT = 'filter_exact';
+    public const string FILTER_START = 'filter_start';
+    public const string FILTER_END = 'filter_end';
+    public const string FILTER_PARTIAL = 'filter_partial';
+    public const string FILTER_WORD_START = 'filter_word_start';
 
     private int $counter = 1;
 
@@ -29,7 +34,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     }
 
     /**
-     * @return ServiceEntityFactory
+     * @return ServiceEntityFactory<T>
      *
      * @throws Exception
      */
@@ -43,7 +48,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * @param object $data
      *
-     * @return ServiceEntityFactory
+     * @return ServiceEntityFactory<T>
      *
      * @throws Exception
      */
@@ -61,7 +66,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * @param object $data
      *
-     * @return ServiceEntityFactory
+     * @return ServiceEntityFactory<T>
      *
      * @throws Exception
      */
@@ -75,7 +80,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * @param object $data
      *
-     * @return ServiceEntityFactory
+     * @return ServiceEntityFactory<T>
      *
      * @throws Exception|ORMException
      */
@@ -89,7 +94,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * @param object $data
      *
-     * @return ServiceEntityFactory
+     * @return ServiceEntityFactory<T>
      *
      * @throws Exception|ORMException
      */
@@ -106,7 +111,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * @param object $data
      *
-     * @return ServiceEntityFactory
+     * @return ServiceEntityFactory<T>
      *
      * @throws Exception
      */
@@ -121,14 +126,14 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * Adding a simple comparison to QueryBuilder
      *
-     * @param QueryBuilder                $qb
-     * @param string                      $field The field's name to find in filter and match in database
-     * @param string|float|int|array|null $value
+     * @param QueryBuilder                               $qb
+     * @param string                                     $field The field's name to find in filter and match in database
+     * @param string|float|int|(string|float|int)[]|null $value
      */
     protected function addComparison(QueryBuilder $qb, string $field, string|float|int|array|null $value): void
     {
         // if nothing was passed, just return
-        if ('' === $value || 'null' === $value || null === $value) {
+        if ('undefined' === $value || 'null' === $value) {
             return;
         }
 
@@ -141,7 +146,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
                 fn (string|float|int $item): string|float|int => is_string($item) ? trim($item) : $item,
                 array_filter(
                     $value,
-                    fn (string|float|int|null $item): bool => null !== $item && 'null' !== $item && '' !== $item
+                    fn (string|float|int|null $item): bool => 'undefined' !== $item && 'null' !== $item
                 )
             ));
 
@@ -155,11 +160,11 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * Adds an ->andWhere() statement for string search to a QueryBuilder
      *
-     * @param QueryBuilder      $qb
-     * @param string            $field
-     * @param string|array|null $value
-     * @param string            $filterType
-     * @param bool              $caseSensitive
+     * @param QueryBuilder                $qb
+     * @param string                      $field
+     * @param string|(string|null)[]|null $value
+     * @param string                      $filterType
+     * @param bool                        $caseSensitive
      */
     protected function addStringSearchTo(QueryBuilder $qb, string $field, string|array|null $value, string $filterType = self::FILTER_EXACT, bool $caseSensitive = true): void
     {
@@ -170,10 +175,11 @@ class ServiceEntityFactory extends ServiceEntityRepository
 
         $varName = $this->unfoldQueryField($field);
         $values = is_string($value) ? [$value] : $value;
+        $values = array_filter($values, fn (mixed $item): bool => is_string($item) && '' !== $item);
 
         if (!$caseSensitive) {
             $varName = sprintf('LOWER(%s)', $varName);
-            $values = array_map(fn ($item) => mb_strtolower($item, 'UTF-8'), $values);
+            $values = array_map(fn (string $item): string => mb_strtolower($item, 'UTF-8'), $values);
         }
 
         foreach ($values as $v) {
@@ -196,10 +202,10 @@ class ServiceEntityFactory extends ServiceEntityRepository
      * Adds an ->andWhere() statement for date(-time) search in a QueryBuilder
      * Use like ?created[gte]=2020-06-20T20:00 (with time or just without)
      *
-     * @param QueryBuilder      $qb
-     * @param string            $field
-     * @param string|array|null $value
-     * @param bool              $allowNull
+     * @param QueryBuilder                                           $qb
+     * @param string                                                 $field
+     * @param string|array<string, string|(string|null)[]|null>|null $value
+     * @param bool                                                   $allowNull
      *
      * @throws Exception
      */
@@ -257,7 +263,7 @@ class ServiceEntityFactory extends ServiceEntityRepository
                 };
 
                 $qb->andWhere(sprintf('%s %s :%s', $varName, $sign, $parameterName));
-                $qb->setParameter($parameterName, (new DateTime($date))->format($format));
+                $qb->setParameter($parameterName, new DateTime($date)->format($format));
             }
         }
     }
@@ -266,10 +272,10 @@ class ServiceEntityFactory extends ServiceEntityRepository
      * Adds an ->andWhere() statement for numeric search in a QueryBuilder
      * Use like ?priority[gte]=1&priority[lte]=4
      *
-     * @param QueryBuilder                $qb
-     * @param string                      $field
-     * @param string|int|float|array|null $value
-     * @param bool                        $allowNull
+     * @param QueryBuilder                                                                         $qb
+     * @param string                                                                               $field
+     * @param string|int|float|array<string, string|int|float|null|(string|int|float|null)[]>|null $value
+     * @param bool                                                                                 $allowNull
      *
      * @throws Exception
      */
@@ -342,10 +348,10 @@ class ServiceEntityFactory extends ServiceEntityRepository
     /**
      * Adds an ->andWhere() statement for boolean search in a QueryBuilder
      *
-     * @param QueryBuilder           $qb
-     * @param string                 $field
-     * @param string|bool|array|null $value
-     * @param bool                   $allowNull
+     * @param QueryBuilder                     $qb
+     * @param string                           $field
+     * @param string|bool|(string|null)[]|null $value
+     * @param bool                             $allowNull
      */
     protected function addBooleanSearchTo(QueryBuilder $qb, string $field, string|bool|array|null $value, bool $allowNull = false): void
     {
@@ -392,8 +398,8 @@ class ServiceEntityFactory extends ServiceEntityRepository
      * Adds an ->andWhere() statement for boolean search in a QueryBuilder
      * To be used with an array of ["field_name" => "ASC"|"DESC"|null]
      *
-     * @param QueryBuilder $qb
-     * @param array        $sorts
+     * @param QueryBuilder          $qb
+     * @param array<string, string> $sorts
      */
     protected function addSortsTo(QueryBuilder $qb, array $sorts): void
     {

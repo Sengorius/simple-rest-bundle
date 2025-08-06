@@ -7,7 +7,7 @@ use Throwable;
 
 class ApiNotFoundException extends RuntimeException
 {
-    public const EXCEPTION_CODE = 404;
+    public const int EXCEPTION_CODE = 404;
 
 
     public function __construct(string $message, Throwable|null $previous = null)

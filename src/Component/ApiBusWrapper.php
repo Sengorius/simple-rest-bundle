@@ -15,12 +15,12 @@ class ApiBusWrapper
 {
     use DoctrineTransformerTrait;
 
-    public const TYPE_NULL = 'null';
-    public const TYPE_BOOL = 'bool';
-    public const TYPE_INT = 'int';
-    public const TYPE_DOUBLE = 'double';
-    public const TYPE_STRING = 'string';
-    public const TYPE_ARRAY = 'array';
+    public const string TYPE_NULL = 'null';
+    public const string TYPE_BOOL = 'bool';
+    public const string TYPE_INT = 'int';
+    public const string TYPE_DOUBLE = 'double';
+    public const string TYPE_STRING = 'string';
+    public const string TYPE_ARRAY = 'array';
 
 
     public function __construct(private readonly MessageBusInterface $bus)
@@ -46,7 +46,7 @@ class ApiBusWrapper
      * Simplifies the handle method to get the result from last handler
      *
      * @param Envelope $envelope      The envelope after sending the message via MessageBus
-     * @param array    $expectedTypes An array of types defining the expected return types from a handler
+     * @param string[] $expectedTypes An array of types defining the expected return types from a handler
      * @param bool     $allowProxy    Also allow Doctrine Proxy classes like "Proxies\__CG__\App\Entity\..."
      *
      * @return mixed|null Returns values with following priority
@@ -88,7 +88,7 @@ class ApiBusWrapper
      * Simplifies the handle method to get results from all handlers
      *
      * @param Envelope $envelope      The envelope after sending the message via MessageBus
-     * @param array    $expectedTypes An array of types defining the expected return types from a handler
+     * @param string[] $expectedTypes An array of types defining the expected return types from a handler
      * @param bool     $allowProxy    Also allow Doctrine Proxy classes like "Proxies\__CG__\App\Entity\..."
      *
      * @return HandledStamp[]|false Returns values with following priority
@@ -129,7 +129,7 @@ class ApiBusWrapper
      * Simplifies the handle method to get only expected results from all handlers
      *
      * @param Envelope $envelope      The envelope after sending the message via MessageBus
-     * @param array    $expectedTypes An array of types defining the expected return types from a handler
+     * @param string[] $expectedTypes An array of types defining the expected return types from a handler
      * @param bool     $allowProxy    Also allow Doctrine Proxy classes like "Proxies\__CG__\App\Entity\..."
      *
      * @return HandledStamp[]
@@ -155,9 +155,9 @@ class ApiBusWrapper
     /**
      * Compare the result on a handle with the expected type
      *
-     * @param mixed $result
-     * @param array $expectedTypes
-     * @param bool  $allowProxy
+     * @param mixed    $result
+     * @param string[] $expectedTypes
+     * @param bool     $allowProxy
      *
      * @return bool
      *
@@ -172,7 +172,7 @@ class ApiBusWrapper
 
         // any expected type has to be described as a string, e.g. null == 'null'
         foreach ($expectedTypes as $type) {
-            if (!is_string($type)) {
+            if (!is_string($type)) { // @phpstan-ignore-line
                 throw new ApiBusException('Only strings or null are allowed to compare expected types for message handling!');
             }
         }

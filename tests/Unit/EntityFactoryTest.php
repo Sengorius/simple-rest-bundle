@@ -34,10 +34,9 @@ class EntityFactoryTest extends TestCase
         $wrapper = $this->createFactoryWrapper();
         $result = 'SELECT t FROM DummyUser t WHERE t.username IN (:username_1)';
         $resultParams = [
-            'muster',
-            'undefined',
-            4,
-            1,
+            0 => 'muster',
+            2 => 4,
+            3 => 1,
         ];
 
         $wrapper->addComparisonProxy($qb, 'username', [
@@ -54,18 +53,19 @@ class EntityFactoryTest extends TestCase
         static::assertSame(['username_1' => $resultParams], $this->unwrapParameters($qb->getParameters()));
     }
 
-    public function testAddInvalidComparison(): void
+    public function testAddNullComparison(): void
     {
         $qb = $this->createQueryBuilder();
         $wrapper = $this->createFactoryWrapper();
-        $result = 'SELECT t FROM DummyUser t';
+        $result = 'SELECT t FROM DummyUser t WHERE t.username = :username_1';
 
         $wrapper->addComparisonProxy($qb, 'username', null);
 
         static::assertInstanceOf(QueryBuilder::class, $qb);
         static::assertIsString($qb->getDQL());
         static::assertSame($result, $qb->getDQL());
-        static::assertCount(0, $qb->getParameters());
+        static::assertCount(1, $qb->getParameters());
+        static::assertSame(['username_1' => null], $this->unwrapParameters($qb->getParameters()));
     }
 
     public function testAddStringSearchExact(): void

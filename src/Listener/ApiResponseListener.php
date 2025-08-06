@@ -23,6 +23,7 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 
 final readonly class ApiResponseListener
 {
+    /** @param string[] $firewallNames */
     public function __construct(private array $firewallNames)
     {
     }

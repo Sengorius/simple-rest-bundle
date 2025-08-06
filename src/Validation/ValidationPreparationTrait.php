@@ -4,6 +4,13 @@ namespace SkriptManufaktur\SimpleRestBundle\Validation;
 
 trait ValidationPreparationTrait
 {
+    /**
+     * @param string                  $propertyPath
+     * @param array<string, string[]> $validationList
+     * @param string                  $defaultRoot
+     *
+     * @return string
+     */
     protected function prepareValidation(string $propertyPath, array &$validationList, string $defaultRoot = 'root'): string
     {
         if ('' === trim($propertyPath)) {
@@ -22,10 +29,10 @@ trait ValidationPreparationTrait
 
         $propertyPath = preg_replace('~\[\d+]$~', '', $propertyPath);
 
-        if (!array_key_exists($propertyPath, $validationList)) {
+        if (null !== $propertyPath && !array_key_exists($propertyPath, $validationList)) {
             $validationList[$propertyPath] = [];
         }
 
-        return $propertyPath;
+        return $propertyPath ?? $defaultRoot;
     }
 }

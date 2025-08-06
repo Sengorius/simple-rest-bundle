@@ -10,17 +10,22 @@ use function is_int;
 use function is_string;
 use function sprintf;
 
+/** @template T of object */
 trait EntityDenormalizerTrait
 {
     private string $defaultHydratingMethod = 'find';
+
+    /** @var array<string, ObjectRepository<T>> */
     private array $repositories;
+
+    /** @var array<string, string> */
     private array $normalizedClasses = [];
 
 
     /**
-     * @param string $type
+     * @param class-string $type
      *
-     * @return ObjectRepository
+     * @return ObjectRepository<T>
      */
     private function getRepository(string $type): ObjectRepository
     {
@@ -33,7 +38,7 @@ trait EntityDenormalizerTrait
         }
 
         try {
-            return $this->repositories[$type] = $manager->getRepository($type);
+            return $this->repositories[$type] = $manager->getRepository($type); // @phpstan-ignore-line
         } catch (Exception $e) {
             throw new UnexpectedValueException(sprintf('Repository for class "%s" not found!', $type), 0, $e);
         }
@@ -43,7 +48,7 @@ trait EntityDenormalizerTrait
      * In case we get an array like [EntityOne::class, EntityTwo:class => 'getOne'],
      * keys and values are mixed and need to be normalized
      *
-     * @param array $classMap
+     * @param array<string|int, string> $classMap
      */
     private function normalizeClassMap(array $classMap): void
     {
@@ -63,7 +68,7 @@ trait EntityDenormalizerTrait
                 throw new UnexpectedValueException(sprintf('Got "%s" which is not a valid class name!', $class));
             }
 
-            if (!is_string($method)) {
+            if (!is_string($method)) { // @phpstan-ignore-line
                 throw new UnexpectedValueException(sprintf('Got hydrating method "%s" which is not valid!', $method));
             }
 

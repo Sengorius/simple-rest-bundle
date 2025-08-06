@@ -4,10 +4,14 @@ namespace SkriptManufaktur\SimpleRestBundle\Pagination;
 
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 
+/**
+ * @template T of mixed
+ *
+ * @extends AbstractPagination<T>
+ */
 class Pagination extends AbstractPagination
 {
     protected bool $booted = false;
-    protected array $items = [];
     protected int|null $itemCount = null;
     protected int|null $itemsPerPage = null;
     protected int|null $maxPages = null;
@@ -19,9 +23,18 @@ class Pagination extends AbstractPagination
     protected bool $isFirstPage = true;
     protected bool $isLastPage = false;
     protected bool $isEmpty = true;
+
+    /** @var array<T> */
+    protected array $items = [];
+
+    /** @var callable[] */
     protected array $filters = [];
 
 
+    /**
+     * @param array<T> $items
+     * @param int      $perPage
+     */
     public function __construct(array $items, int $perPage)
     {
         $this->items = $items;
@@ -48,6 +61,7 @@ class Pagination extends AbstractPagination
         }
     }
 
+    /** @return AbstractPagination<T> */
     public function boot(): AbstractPagination
     {
         // trace all filters to get the main result
@@ -70,7 +84,7 @@ class Pagination extends AbstractPagination
      *
      * @param int|null $page
      *
-     * @return array
+     * @return array<T>
      */
     public function getPage(int|null $page = null): array
     {
@@ -100,7 +114,7 @@ class Pagination extends AbstractPagination
     /**
      * Return items of the next page by currentPage + 1
      *
-     * @return array
+     * @return array<T>
      */
     public function nextPage(): array
     {
@@ -110,7 +124,7 @@ class Pagination extends AbstractPagination
     /**
      * Return items of the previous page by currentPage - 1
      *
-     * @return array
+     * @return array<T>
      */
     public function prevPage(): array
     {
@@ -120,7 +134,7 @@ class Pagination extends AbstractPagination
     /**
      * Update current page
      *
-     * @return Pagination
+     * @return Pagination<T>
      */
     public function next(): AbstractPagination
     {
@@ -136,7 +150,7 @@ class Pagination extends AbstractPagination
     /**
      * Update current page
      *
-     * @return Pagination
+     * @return Pagination<T>
      */
     public function prev(): AbstractPagination
     {
@@ -149,6 +163,7 @@ class Pagination extends AbstractPagination
         return $this;
     }
 
+    /** @return array<T> */
     public function getItems(): array
     {
         return $this->items;
@@ -195,6 +210,11 @@ class Pagination extends AbstractPagination
         return $this->currentPage;
     }
 
+    /**
+     * @param int $currentPage
+     *
+     * @return AbstractPagination<T>
+     */
     public function setCurrentPage(int $currentPage): AbstractPagination
     {
         $this->currentPage = $currentPage;
@@ -237,11 +257,17 @@ class Pagination extends AbstractPagination
         return !empty($this->filters);
     }
 
+    /** @return callable[] */
     public function getFilters(): array
     {
         return $this->filters;
     }
 
+    /**
+     * @param callable $filter
+     *
+     * @return AbstractPagination<T>
+     */
     public function addFilter(callable $filter): AbstractPagination
     {
         $this->filters[] = $filter;
@@ -250,6 +276,11 @@ class Pagination extends AbstractPagination
         return $this;
     }
 
+    /**
+     * @param int $key
+     *
+     * @return AbstractPagination<T>
+     */
     public function removeFilter(int $key): AbstractPagination
     {
         if (isset($this->filters[$key])) {
@@ -263,9 +294,9 @@ class Pagination extends AbstractPagination
     /**
      * Use all filters on the items
      *
-     * @param array $items
+     * @param array<T> $items
      *
-     * @return array
+     * @return array<T>
      */
     protected function filter(array $items): array
     {

@@ -15,13 +15,15 @@ use function is_array;
 use function is_int;
 use function is_null;
 
+/** @template T of object */
 class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
 {
+    /** @use EntityDenormalizerTrait<T> */
     use EntityDenormalizerTrait;
 
-    public const CLASS_MAP = 'entity_id_denormalize_class_map';
-    public const PREVENT = 'entity_id_denormalize_prevent_recursion';
-    public const KEY = 'id';
+    public const string CLASS_MAP = 'entity_id_denormalize_class_map';
+    public const string PREVENT = 'entity_id_denormalize_prevent_recursion';
+    public const string KEY = 'id';
 
     private DenormalizerInterface $denormalizer;
 
@@ -38,10 +40,10 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
     /**
      * Checks whether the given class is supported for denormalization by this normalizer.
      *
-     * @param mixed       $data    Data to denormalize from
-     * @param string      $type    The class to which the data should be denormalized
-     * @param string|null $format  The format being deserialized from
-     * @param array       $context options that denormalizers have access to
+     * @param mixed        $data    Data to denormalize from
+     * @param string       $type    The class to which the data should be denormalized
+     * @param string|null  $format  The format being deserialized from
+     * @param array<mixed> $context options that denormalizers have access to
      *
      * @return bool
      */
@@ -75,12 +77,14 @@ class EntityIdDenormalizer implements DenormalizerInterface, DenormalizerAwareIn
     /**
      * Denormalizes an ID back into an object of the given class.
      *
-     * @param mixed       $data    Data to restore
-     * @param string      $type    The expected class to instantiate
-     * @param string|null $format  Format the given data was extracted from
-     * @param array       $context Options available to the denormalizer
+     * @param mixed        $data    Data to restore
+     * @param class-string $type    The expected class to instantiate
+     * @param string|null  $format  Format the given data was extracted from
+     * @param array<mixed> $context Options available to the denormalizer
      *
      * @return object|null
+     *
+     * @phpstan-return T|null
      *
      * @throws UnexpectedValueException Occurs when the item cannot be hydrated with the given data
      * @throws ExceptionInterface

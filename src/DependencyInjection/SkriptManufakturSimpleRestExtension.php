@@ -30,7 +30,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
     /**
      * Loads a specific configuration.
      *
-     * @param array            $configs
+     * @param array<mixed>     $configs
      * @param ContainerBuilder $container
      *
      * @throws Exception
@@ -43,7 +43,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
         // register the simple services
         $container->setDefinition(
             ApiBusWrapper::class,
-            (new Definition(ApiBusWrapper::class, [new Reference(MessageBusInterface::class)]))
+            new Definition(ApiBusWrapper::class, [new Reference(MessageBusInterface::class)])
         );
         $container->setAlias('skriptmanufaktur.simple_rest.component.api_bus_wrapper', ApiBusWrapper::class);
 
@@ -76,21 +76,21 @@ class SkriptManufakturSimpleRestExtension extends Extension
         // add services and middlewares
         $container->setDefinition(
             ValidationMiddleware::class,
-            (new Definition(ValidationMiddleware::class, [new Reference('validator')]))
+            new Definition(ValidationMiddleware::class, [new Reference('validator')])
         );
 
         // add serializer capabilities for Doctrine, if Doctrine is enabled
         if (class_exists(EntityManager::class)) {
             $container->setDefinition(
                 EntityIdDenormalizer::class,
-                (new Definition(EntityIdDenormalizer::class, [new Reference('doctrine')]))
+                new Definition(EntityIdDenormalizer::class, [new Reference('doctrine')])
                     ->addTag('serializer.normalizer')
             );
             $container->setAlias('skriptmanufaktur.simple_rest.component.entity_id_denormalizer', EntityIdDenormalizer::class);
 
             $container->setDefinition(
                 EntityUuidDenormalizer::class,
-                (new Definition(EntityUuidDenormalizer::class, [new Reference('doctrine')]))
+                new Definition(EntityUuidDenormalizer::class, [new Reference('doctrine')])
                     ->addTag('serializer.normalizer')
             );
             $container->setAlias('skriptmanufaktur.simple_rest.component.entity_uuid_denormalizer', EntityUuidDenormalizer::class);
@@ -100,16 +100,16 @@ class SkriptManufakturSimpleRestExtension extends Extension
         if (class_exists(AuthorizationChecker::class)) {
             $container->setDefinition(
                 GrantingMiddleware::class,
-                (new Definition(GrantingMiddleware::class, [
+                new Definition(GrantingMiddleware::class, [
                     new Reference('security.authorization_checker'),
                     $configuration['granting_middleware_throws'],
-                ]))
+                ])
             );
             $container->setAlias('skriptmanufaktur.simple_rest.voter.granting_middleware', GrantingMiddleware::class);
 
             $container->setDefinition(
                 RoleService::class,
-                (new Definition(RoleService::class, [new Parameter('security.role_hierarchy.roles')]))
+                new Definition(RoleService::class, [new Parameter('security.role_hierarchy.roles')])
             );
             $container->setAlias('skriptmanufaktur.simple_rest.voter.role_service', RoleService::class);
         }
@@ -117,14 +117,14 @@ class SkriptManufakturSimpleRestExtension extends Extension
         // add listeners
         $container->setDefinition(
             RequestListener::class,
-            (new Definition(RequestListener::class, [$configuration['default_requesting_origin']]))
+            new Definition(RequestListener::class, [$configuration['default_requesting_origin']])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.request', 'method' => 'onRequestProceed'])
         );
         $container->setAlias('skriptmanufaktur.simple_rest.listener.request_params', RequestListener::class);
 
         $container->setDefinition(
             ApiResponseListener::class,
-            (new Definition(ApiResponseListener::class, [$configuration['firewall_names']]))
+            new Definition(ApiResponseListener::class, [$configuration['firewall_names']])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.exception', 'method' => 'formatException', 'priority' => -10])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'testApiResponseType', 'priority' => 100])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'addFlashbagMessages', 'priority' => 90])

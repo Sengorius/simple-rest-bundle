@@ -6,11 +6,22 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
 use SkriptManufaktur\SimpleRestBundle\Exception\PaginationException;
 
+/**
+ * @template T of mixed
+ *
+ * @extends Pagination<T>
+ */
 class SinglePage extends Pagination
 {
     protected int $maxItems = 0;
 
 
+    /**
+     * @param array<T> $items
+     * @param int      $perPage
+     * @param int      $page
+     * @param int      $maxItems
+     */
     public function __construct(array $items, int $perPage, int $page, int $maxItems)
     {
         parent::__construct($items, $perPage);
@@ -20,11 +31,11 @@ class SinglePage extends Pagination
     }
 
     /**
-     * @param Paginator $paginator
-     * @param int       $perPage
-     * @param int       $page
+     * @param Paginator<T> $paginator
+     * @param int          $perPage
+     * @param int          $page
      *
-     * @return SinglePage
+     * @return SinglePage<T>
      *
      * @throws Exception
      */
@@ -36,6 +47,7 @@ class SinglePage extends Pagination
         return new self($items, $perPage, $page, $maxItems);
     }
 
+    /** @return AbstractPagination<T> */
     public function boot(): AbstractPagination
     {
         // trace all filters to get the main result
@@ -68,7 +80,7 @@ class SinglePage extends Pagination
      *
      * @param int|null $page
      *
-     * @return array
+     * @return array<T>
      *
      * @throws PaginationException
      */
@@ -88,7 +100,7 @@ class SinglePage extends Pagination
     }
 
     /**
-     * @return AbstractPagination
+     * @return AbstractPagination<T>
      *
      * @throws PaginationException
      */
@@ -98,7 +110,7 @@ class SinglePage extends Pagination
     }
 
     /**
-     * @return AbstractPagination
+     * @return AbstractPagination<T>
      *
      * @throws PaginationException
      */
@@ -108,7 +120,7 @@ class SinglePage extends Pagination
     }
 
     /**
-     * @return array
+     * @return array<T>
      *
      * @throws PaginationException
      */
@@ -118,7 +130,7 @@ class SinglePage extends Pagination
     }
 
     /**
-     * @return array
+     * @return array<T>
      *
      * @throws PaginationException
      */

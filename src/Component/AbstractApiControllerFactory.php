@@ -13,12 +13,13 @@ use function json_last_error_msg;
 use function sprintf;
 use function strtoupper;
 
+/** @template T of object */
 abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
 {
     /**
      * @param Request $request
      *
-     * @return array
+     * @return array<mixed>
      *
      * @throws ApiProcessException
      */
@@ -46,7 +47,9 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
      * @param object[] $entities
      * @param string[] $groups
      *
-     * @return array
+     * @phpstan-param T[] $entities
+     *
+     * @return array<mixed>
      *
      * @throws ApiProcessException
      */
@@ -58,10 +61,22 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
     /**
      * Maps the normalized collection from pagination + pagination data into an array
      *
-     * @param Pagination $pagination
-     * @param array      $groups
+     * @param Pagination<T> $pagination
+     * @param string[]      $groups
      *
-     * @return array
+     * @return array{
+     *     'count': int,
+     *     'perPage': int,
+     *     'maxPages': int,
+     *     'page': int,
+     *     'lowerBound': int|null,
+     *     'upperBound': int|null,
+     *     'isSatisfied': bool,
+     *     'isEmpty': bool,
+     *     'isFirstPage': bool,
+     *     'isLastPage': bool,
+     *     'items': array<mixed>,
+     * }
      */
     protected function normalizePagination(Pagination $pagination, array $groups = []): array
     {

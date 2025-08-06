@@ -10,24 +10,42 @@ class ApiResponse extends JsonResponse
 {
     use ValidationPreparationTrait;
 
-    public const MSGTYPE_SUCCESS = 'success';
-    public const MSGTYPE_INFO = 'info';
-    public const MSGTYPE_WARNING = 'warning';
-    public const MSGTYPE_ERROR = 'error';
-    public const EMPTY_MESSAGES = [
+    public const string MSGTYPE_SUCCESS = 'success';
+    public const string MSGTYPE_INFO = 'info';
+    public const string MSGTYPE_WARNING = 'warning';
+    public const string MSGTYPE_ERROR = 'error';
+    public const array EMPTY_MESSAGES = [
         self::MSGTYPE_SUCCESS => [],
         self::MSGTYPE_INFO => [],
         self::MSGTYPE_WARNING => [],
         self::MSGTYPE_ERROR => [],
     ];
-    public const VALID_ROOT = 'root';
+    public const string VALID_ROOT = 'root';
 
+    /** @var array<mixed> */
     private array $apiData = [];
+
+    /**
+     * @var array{
+     *     'success'?: string[],
+     *     'info'?: string[],
+     *     'warning'?: string[],
+     *     'error'?: string[],
+     * }
+     */
     private array $apiMessages = self::EMPTY_MESSAGES;
+
+    /** @var array<string, string[]> */
     private array $validation = [];
+
     private Throwable|null $throwable = null;
 
 
+    /**
+     * @param mixed                               $data
+     * @param int                                 $status
+     * @param array<string, string|string[]|null> $headers
+     */
     public function __construct(mixed $data = [], int $status = 200, array $headers = [])
     {
         parent::__construct('', $status, $headers, true);
@@ -51,17 +69,18 @@ class ApiResponse extends JsonResponse
     /**
      * Factory method for chainability
      *
-     * @param array $data
-     * @param int   $status
-     * @param array $headers
+     * @param mixed                               $data
+     * @param int                                 $status
+     * @param array<string, string|string[]|null> $headers
      *
      * @return ApiResponse
      */
-    public static function create(array$data = [], int $status = 200, array $headers = []): self
+    public static function create(mixed $data = [], int $status = 200, array $headers = []): self
     {
         return new self($data, $status, $headers);
     }
 
+    /** @return array<mixed> */
     public function getData(): array
     {
         return $this->apiData;
@@ -75,6 +94,11 @@ class ApiResponse extends JsonResponse
         return $this;
     }
 
+    /**
+     * @param string|null $type
+     *
+     * @return array<string, string[]>|string[]
+     */
     public function getMessages(string|null $type = null): array
     {
         if (null !== $type && array_key_exists($type, $this->apiMessages)) {
@@ -94,6 +118,12 @@ class ApiResponse extends JsonResponse
         return $this;
     }
 
+    /**
+     * @param string   $type
+     * @param string[] $messages
+     *
+     * @return $this
+     */
     public function mergeMessages(string $type, array $messages): self
     {
         if (array_key_exists($type, $this->apiMessages)) {
@@ -130,8 +160,15 @@ class ApiResponse extends JsonResponse
         return $this;
     }
 
+    /**
+     * @param string   $component
+     * @param string[] $messages
+     *
+     * @return $this
+     */
     public function mergeValidationIssues(string $component, array $messages): self
     {
+        // @phpstan-ignore-next-line
         $messages = array_filter($messages, fn ($message): bool => is_string($message) && !empty($message));
 
         if (empty($messages)) {

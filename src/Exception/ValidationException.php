@@ -14,8 +14,8 @@ class ValidationException extends RuntimeException
 {
     use ValidationPreparationTrait;
 
-    public const VALIDATION_ROOT_KEY = 'root';
-    public const EXCEPTION_CODE = 334;
+    public const string VALIDATION_ROOT_KEY = 'root';
+    public const int EXCEPTION_CODE = 334;
 
     private object $entity;
     private ConstraintViolationListInterface $violations;
@@ -53,6 +53,7 @@ class ValidationException extends RuntimeException
         return $this->violations;
     }
 
+    /** @return array<string, string[]> */
     public function getStringifiedViolations(): array
     {
         $violations = [

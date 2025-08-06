@@ -11,8 +11,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class RoleService extends RoleHierarchy
 {
-    public const STRATEGY_AND = 'and';
-    public const STRATEGY_OR = 'or';
+    public const string STRATEGY_AND = 'and';
+    public const string STRATEGY_OR = 'or';
 
     /** @var string[]|null */
     private array|null $flatRoles = null;

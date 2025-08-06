@@ -10,7 +10,7 @@ class SkriptManufakturSimpleRestBundle extends Bundle
 {
     public function getContainerExtension(): ExtensionInterface
     {
-        if (null === $this->extension) {
+        if (!$this->extension) {
             $this->extension = new SkriptManufakturSimpleRestExtension();
         }
 

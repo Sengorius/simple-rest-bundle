@@ -45,29 +45,47 @@ final class FilterData implements Serializable
         ;
     }
 
+    /**
+     * @param class-string                                 $filterInterface
+     * @param array<string, int|bool|string|string[]|null> $search
+     * @param array<string, string|null>                   $sort
+     *
+     * @return self
+     */
     public static function createFromAttributes(string $filterInterface, array $search = [], array $sort = []): self
     {
-        return (new self())
+        return new self()
             ->satisfyApiFilterInterface($filterInterface)
             ->mergeAttributes($search)
             ->mergeSortings($sort)
         ;
     }
 
+    /**
+     * @param class-string $filterInterface
+     * @param Request      $request
+     *
+     * @return self
+     */
     public static function createFromRequest(string $filterInterface, Request $request): self
     {
-        return (new self())
+        return new self()
             ->satisfyApiFilterInterface($filterInterface)
             ->mergeRequest($request)
         ;
     }
 
+    /**
+     * @param class-string $filterInterface
+     *
+     * @return $this
+     */
     public function satisfyApiFilterInterface(string $filterInterface): self
     {
         // consolidate the class of being filterable
         try {
             $ref = new ReflectionClass($filterInterface);
-        } catch (ReflectionException) {
+        } catch (ReflectionException) { // @phpstan-ignore-line
             throw new ApiProcessException(sprintf(
                 '"%s" is not a valid FQCN (class string)!',
                 $filterInterface
@@ -99,6 +117,12 @@ final class FilterData implements Serializable
         return $this;
     }
 
+    /**
+     * @param string                                        $key
+     * @param string|int|bool|(string|int|bool|null)[]|null $value
+     *
+     * @return $this
+     */
     public function addAttribute(string $key, string|int|bool|array|null $value): self
     {
         if ('page' === $key) {
@@ -116,10 +140,10 @@ final class FilterData implements Serializable
             return $this;
         }
 
-        $this->search[$key] = $value;
+        $this->search[$key] = $value; // @phpstan-ignore-line
 
         // add possible type casting for booleans
-        if (null !== $value && !is_array($value) && in_array(strtolower($value), ['true', 'false', 't', 'f'])) {
+        if (is_string($value) && in_array(strtolower($value), ['true', 'false', 't', 'f'])) {
             $this->searchResolver->addNormalizer(
                 $key,
                 fn (Options $options, $value): bool => in_array(strtolower($value), ['true', 't'])
@@ -140,6 +164,11 @@ final class FilterData implements Serializable
         return $this;
     }
 
+    /**
+     * @param array<string, int|bool|string|string[]|null> $attributes
+     *
+     * @return $this
+     */
     public function mergeAttributes(array $attributes): self
     {
         foreach ($attributes as $key => $value) {
@@ -149,6 +178,11 @@ final class FilterData implements Serializable
         return $this;
     }
 
+    /**
+     * @param array<string, string|null> $sortings
+     *
+     * @return $this
+     */
     public function mergeSortings(array $sortings): self
     {
         foreach ($sortings as $key => $direction) {
@@ -205,6 +239,7 @@ final class FilterData implements Serializable
         ];
     }
 
+    /** @param array{ 'search'?: array<string, int|bool|string|string[]|null>, 'sort'?: array<string, string|null>, 'interface'?: class-string|null } $data */
     public function __unserialize(array $data): void
     {
         // fire the constructor, to init the option resolvers
@@ -230,6 +265,11 @@ final class FilterData implements Serializable
         $this->__unserialize(json_decode($data, true));
     }
 
+    /**
+     * @param string|null $key
+     *
+     * @return array<string, int|bool|string|string[]|null>|string|string[]|int|bool|null
+     */
     public function getSearch(string|null $key = null): array|string|int|bool|null
     {
         if (!$this->booted) {
@@ -248,9 +288,14 @@ final class FilterData implements Serializable
             return $this->search[$key];
         }
 
-        return $this->search;
+        return $this->search; // @phpstan-ignore-line
     }
 
+    /**
+     * @param string|null $key
+     *
+     * @return array<string, string|null>|string|null
+     */
     public function getSorting(string|null $key = null): array|string|null
     {
         if (!$this->booted) {
@@ -282,6 +327,6 @@ final class FilterData implements Serializable
             throw new ApiProcessException('FilterData was not booted!');
         }
 
-        return $this->search['page'] ?: 0;
+        return (int) $this->search['page'] ?: 0;
     }
 }

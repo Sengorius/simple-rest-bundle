@@ -7,7 +7,7 @@ use Throwable;
 
 class PaginationException extends RuntimeException
 {
-    public const EXCEPTION_CODE = 333;
+    public const int EXCEPTION_CODE = 333;
 
 
     public function __construct(string $message, Throwable|null $previous = null)

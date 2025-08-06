@@ -7,7 +7,7 @@ use Throwable;
 
 class ApiProcessException extends RuntimeException
 {
-    public const EXCEPTION_CODE = 332;
+    public const int EXCEPTION_CODE = 332;
 
 
     public function __construct(string $message, Throwable|null $previous = null)

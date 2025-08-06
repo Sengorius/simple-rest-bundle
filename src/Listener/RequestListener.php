@@ -6,7 +6,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 final readonly class RequestListener
 {
-    public const REQ_SERVER = '_requesting_server';
+    public const string REQ_SERVER = '_requesting_server';
 
 
     public function __construct(private string $defaultRequestingServer)
