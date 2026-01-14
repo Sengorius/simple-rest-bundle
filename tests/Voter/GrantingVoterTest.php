@@ -2,6 +2,7 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Voter;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DefaultVoter;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyMessage;
@@ -12,6 +13,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
+#[CoversClass(GrantingStamp::class)]
 class GrantingVoterTest extends TestCase
 {
     private TokenInterface $token;
@@ -23,7 +25,7 @@ class GrantingVoterTest extends TestCase
     {
         parent::setUp();
 
-        $this->token = $this->createMock(TokenInterface::class);
+        $this->token = $this->createStub(TokenInterface::class);
         $this->grantingVoter = new DummyVoter();
         $this->manager = new AccessDecisionManager([$this->grantingVoter, new DefaultVoter()]);
     }

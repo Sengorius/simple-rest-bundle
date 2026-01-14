@@ -3,6 +3,7 @@
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Unit;
 
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SkriptManufaktur\SimpleRestBundle\Validation\ValidationPreparationTrait;
 
@@ -11,13 +12,7 @@ class ValidationPreparationTest extends TestCase
     use ValidationPreparationTrait;
 
 
-    /**
-     * @dataProvider validationProvider
-     *
-     * @param string $propertyPath
-     * @param string $finishedPropertyPath
-     * @param array  $result
-     */
+    #[DataProvider('validationProvider')]
     public function testCreation(string $propertyPath, string $finishedPropertyPath, array $result): void
     {
         $violations = [];

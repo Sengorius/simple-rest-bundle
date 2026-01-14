@@ -23,22 +23,22 @@ class EntityIdNormalizerTest extends TestCase
         parent::setUp();
 
         $this->embeddeds = [
-            (new EmbeddedDummyEntity())
+            new EmbeddedDummyEntity()
                 ->setId(3)
                 ->setType('t1')
                 ->setActive(true)
             ,
-            (new EmbeddedDummyEntity())
+            new EmbeddedDummyEntity()
                 ->setId(4)
                 ->setType('t2')
                 ->setActive(true)
             ,
-            (new EmbeddedDummyEntity())
+            new EmbeddedDummyEntity()
                 ->setId(5)
                 ->setType('t3')
                 ->setActive(true)
             ,
-            (new EmbeddedDummyEntity())
+            new EmbeddedDummyEntity()
                 ->setId(6)
                 ->setType('t1')
                 ->setActive(false)
@@ -160,8 +160,8 @@ class EntityIdNormalizerTest extends TestCase
             'created' => '2022-08-20 14:20:54',
         ];
 
-        $result = $this->createIdSerializer('getOne')->denormalize($data, DummyEntity::class, null, [
-            EntityIdDenormalizer::CLASS_MAP => [EmbeddedDummyEntity::class => 'getOne'],
+        $result = $this->createIdSerializer('getOneFromId')->denormalize($data, DummyEntity::class, null, [
+            EntityIdDenormalizer::CLASS_MAP => [EmbeddedDummyEntity::class => 'getOneFromId'],
         ]);
 
         static::assertInstanceOf(DummyEntity::class, $result);

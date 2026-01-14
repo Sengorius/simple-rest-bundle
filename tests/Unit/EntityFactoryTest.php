@@ -338,7 +338,7 @@ class EntityFactoryTest extends TestCase
 
     private function createQueryBuilder(): QueryBuilder
     {
-        $emMock = self::createMock(EntityManagerInterface::class);
+        $emMock = $this->createStub(EntityManagerInterface::class);
 
         $qb = new QueryBuilder($emMock);
         $qb->select('t')->from('DummyUser', 't');
@@ -348,7 +348,7 @@ class EntityFactoryTest extends TestCase
 
     private function createFactoryWrapper(): ServiceEntityFactory
     {
-        $mrMock = self::createMock(ManagerRegistry::class);
+        $mrMock = $this->createStub(ManagerRegistry::class);
 
         return new class($mrMock, DummyEntity::class) extends ServiceEntityFactory
         {

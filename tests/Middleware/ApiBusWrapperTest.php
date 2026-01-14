@@ -282,7 +282,7 @@ class ApiBusWrapperTest extends TestCase
     private function createApiBusWrapper(object $message, array $stamps = []): ApiBusWrapper
     {
         $envelope = Envelope::wrap($message, $stamps);
-        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus = $this->createStub(MessageBusInterface::class);
         $messageBus->method('dispatch')
             ->with($message, $stamps)
             ->willReturn($envelope)

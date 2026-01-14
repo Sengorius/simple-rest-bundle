@@ -23,22 +23,22 @@ class EntityUuidNormalizerTest extends TestCase
         parent::setUp();
 
         $this->embeddeds = [
-            (new EmbeddedUuidDummyEntity())
+            new EmbeddedUuidDummyEntity()
                 ->setId('56c190d2-c864-43c5-8c2a-61092b2474c6')
                 ->setType('t1')
                 ->setActive(true)
             ,
-            (new EmbeddedUuidDummyEntity())
+            new EmbeddedUuidDummyEntity()
                 ->setId('a92fb3c0-5132-4ed7-96e3-b917dbabf681')
                 ->setType('t2')
                 ->setActive(true)
             ,
-            (new EmbeddedUuidDummyEntity())
+            new EmbeddedUuidDummyEntity()
                 ->setId('6e6e7d62-f2f3-4414-9da9-01e1768da6ea')
                 ->setType('t3')
                 ->setActive(true)
             ,
-            (new EmbeddedUuidDummyEntity())
+            new EmbeddedUuidDummyEntity()
                 ->setId('f079b6da-3f5c-4655-850c-abd7ab22d65d')
                 ->setType('t1')
                 ->setActive(false)
@@ -164,8 +164,8 @@ class EntityUuidNormalizerTest extends TestCase
             'created' => '2022-08-20 14:20:54',
         ];
 
-        $result = $this->createUuidSerializer('getOne')->denormalize($data, DummyEntity::class, null, [
-            EntityUuidDenormalizer::CLASS_MAP => [EmbeddedUuidDummyEntity::class => 'getOne'],
+        $result = $this->createUuidSerializer('getOneFromUuid')->denormalize($data, DummyEntity::class, null, [
+            EntityUuidDenormalizer::CLASS_MAP => [EmbeddedUuidDummyEntity::class => 'getOneFromUuid'],
         ]);
 
         static::assertInstanceOf(DummyEntity::class, $result);

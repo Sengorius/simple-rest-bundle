@@ -2,11 +2,11 @@
 
 namespace SkriptManufaktur\SimpleRestBundle\Tests\Normalizer;
 
-use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
+use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyEntityRepository;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\EmbeddedDummyEntity;
 use SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\EmbeddedUuidDummyEntity;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -65,13 +65,11 @@ trait SerializerMockingTrait
 
     private function createManagerRegistry(string $hydratingMethod, string $className, callable $repoCallback): ManagerRegistry
     {
-        $repository = $this->getMockBuilder(EntityRepository::class)
+        $repository = $this->getStubBuilder(DummyEntityRepository::class)
             ->disableOriginalConstructor()
             ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->onlyMethods(['find', 'findAll'])
-            ->addMethods(['getOne'])
-            ->getMock()
+            ->onlyMethods(['find', 'findAll', 'getOneFromId', 'getOneFromUuid'])
+            ->getStub()
         ;
 
         $repository
@@ -79,14 +77,14 @@ trait SerializerMockingTrait
             ->willReturnCallback($repoCallback)
         ;
 
-        $objManager = $this->createMock(ObjectManager::class);
+        $objManager = $this->createStub(ObjectManager::class);
         $objManager
             ->method('getRepository')
             ->with($className)
             ->willReturn($repository)
         ;
 
-        $registry = $this->createMock(ManagerRegistry::class);
+        $registry = $this->createStub(ManagerRegistry::class);
         $registry
             ->method('getManagerForClass')
             ->with($className)
