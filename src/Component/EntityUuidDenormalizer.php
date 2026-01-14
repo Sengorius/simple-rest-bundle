@@ -3,7 +3,7 @@
 namespace SkriptManufaktur\SimpleRestBundle\Component;
 
 use Doctrine\Persistence\ManagerRegistry;
-use Exception;
+use Error;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -111,7 +111,7 @@ class EntityUuidDenormalizer implements DenormalizerInterface, DenormalizerAware
             }
 
             return $result;
-        } catch (Exception $e) {
+        } catch (Error $e) {
             throw new UnexpectedValueException(
                 sprintf('Trying to call %s::%s(%s) failed!', get_class($repository), $hydratingMethod, $entityId),
                 0,
