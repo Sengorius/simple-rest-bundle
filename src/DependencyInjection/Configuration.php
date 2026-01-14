@@ -15,7 +15,6 @@ class Configuration implements ConfigurationInterface
         /** @var ArrayNodeDefinition $rootNode */
         $rootNode = $tree->getRootNode();
 
-        /* @phpstan-ignore-next-line */
         $rootNode
             ->children()
                 ->arrayNode('firewall_names')
