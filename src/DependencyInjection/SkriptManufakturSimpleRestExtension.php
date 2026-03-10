@@ -129,7 +129,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
 
     private function checkBasicBundles(): void
     {
-        if (!interface_exists(Request::class)) {
+        if (!class_exists(Request::class)) {
             throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Http-Foundation to be installed.');
         }
 
