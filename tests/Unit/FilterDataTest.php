@@ -16,21 +16,21 @@ class FilterDataTest extends TestCase
         $filter = new FilterData();
         $filter->boot();
 
-        static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
         static::assertIsArray($filter->getSorting());
         static::assertSame(0, $filter->getPage());
         static::assertSame(0, $filter->getSearch('page'));
+        static::assertSame(0, $filter->getLimit());
+        static::assertSame(0, $filter->getSearch('limit'));
     }
 
     public function testSimpleCreation(): void
     {
-        $filter = (new FilterData())
+        $filter = new FilterData()
             ->satisfyApiFilterInterface(DummyFilterObject::class)
             ->boot()
         ;
 
-        static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
         static::assertIsArray($filter->getSorting());
         static::assertSame(0, $filter->getPage());
@@ -43,12 +43,11 @@ class FilterDataTest extends TestCase
 
     public function testGetUndefinedDefault(): void
     {
-        $filter = (new FilterData())
+        $filter = new FilterData()
             ->satisfyApiFilterInterface(DummyFilterObject::class)
             ->boot()
         ;
 
-        static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
         static::assertIsArray($filter->getSorting());
 
@@ -61,7 +60,6 @@ class FilterDataTest extends TestCase
     {
         $filter = FilterData::createFromAttributes(DummyFilterObject::class);
 
-        static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
         static::assertNotEmpty($filter->getSearch());
         static::assertIsArray($filter->getSorting());
@@ -84,7 +82,6 @@ class FilterDataTest extends TestCase
             ->boot()
         ;
 
-        static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
         static::assertIsArray($filter->getSorting());
         static::assertSame(1, $filter->getPage());
@@ -106,11 +103,12 @@ class FilterDataTest extends TestCase
                 'gte' => 2,
             ],
             'page' => 2,
+            'limit' => 30,
         ];
 
         $filter = FilterData::createFromAttributes(DummyFilterObject::class, $data, $sort);
 
-        $expectedSerialized = 'O:54:"SkriptManufaktur\SimpleRestBundle\Component\FilterData":3:{s:6:"search";a:5:{s:4:"date";s:10:"'.date('Y-m-d').'";s:7:"enabled";b:1;s:4:"page";i:1;s:4:"name";s:3:"Sam";s:4:"rank";a:1:{s:3:"gte";i:2;}}s:4:"sort";a:2:{s:4:"date";N;s:4:"rank";s:3:"ASC";}s:9:"interface";s:66:"SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyFilterObject";}';
+        $expectedSerialized = 'O:54:"SkriptManufaktur\SimpleRestBundle\Component\FilterData":3:{s:6:"search";a:6:{s:4:"date";s:10:"'.date('Y-m-d').'";s:7:"enabled";b:1;s:4:"page";i:1;s:5:"limit";i:30;s:4:"name";s:3:"Sam";s:4:"rank";a:1:{s:3:"gte";i:2;}}s:4:"sort";a:2:{s:4:"date";N;s:4:"rank";s:3:"ASC";}s:9:"interface";s:66:"SkriptManufaktur\SimpleRestBundle\Tests\Fixtures\DummyFilterObject";}';
         $serializedFilter = serialize($filter);
         static::assertIsString($serializedFilter);
         static::assertSame($expectedSerialized, $serializedFilter);
@@ -138,18 +136,19 @@ class FilterDataTest extends TestCase
                 'gte' => 2,
             ],
             'page' => 2,
+            'limit' => 20,
         ];
 
         $filter = FilterData::createFromAttributes(DummyFilterObject::class, $data, $sort);
 
-        $expectedSerialized = '{"search":{"date":"'.date('Y-m-d').'","enabled":true,"page":1,"name":"Sam","rank":{"gte":2}},"sort":{"date":null,"rank":"ASC"},"interface":"SkriptManufaktur\\\\SimpleRestBundle\\\\Tests\\\\Fixtures\\\\DummyFilterObject"}';
+        $expectedSerialized = '{"search":{"date":"'.date('Y-m-d').'","enabled":true,"page":1,"limit":20,"name":"Sam","rank":{"gte":2}},"sort":{"date":null,"rank":"ASC"},"interface":"SkriptManufaktur\\\\SimpleRestBundle\\\\Tests\\\\Fixtures\\\\DummyFilterObject"}';
         $serializedFilter = $filter->serialize();
         static::assertIsString($serializedFilter);
         static::assertSame($expectedSerialized, $serializedFilter);
 
         $unserializedFilter = new FilterData();
         $unserializedFilter->unserialize($serializedFilter);
-        static::assertInstanceOf(FilterData::class, $unserializedFilter);
+
         static::assertIsArray($filter->getSearch());
         static::assertIsArray($filter->getSorting());
         static::assertSame(1, $filter->getPage());
@@ -177,7 +176,6 @@ class FilterDataTest extends TestCase
             ->boot()
         ;
 
-        static::assertInstanceOf(FilterData::class, $filter);
         static::assertIsArray($filter->getSearch());
         static::assertIsArray($filter->getSorting());
         static::assertSame(1, $filter->getPage());

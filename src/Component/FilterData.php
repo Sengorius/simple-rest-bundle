@@ -42,6 +42,9 @@ final class FilterData implements Serializable
             ->setDefault('page', 0)
             ->setRequired('page')
             ->setAllowedTypes('page', ['int', 'string'])
+            ->setDefault('limit', 0)
+            ->setRequired('limit')
+            ->setAllowedTypes('limit', ['int', 'string'])
         ;
     }
 
@@ -125,11 +128,12 @@ final class FilterData implements Serializable
      */
     public function addAttribute(string $key, string|int|bool|array|null $value): self
     {
-        if ('page' === $key) {
-            $page = (int) $value;
+        if (in_array($key, ['page', 'limit'], true)) {
+            $v = (int) $value;
 
-            if ($page >= 1) {
-                $this->search['page'] = $page - 1;
+            if ($v >= 1) {
+                // lower page with -1 to get down to 0
+                $this->search[$key] = 'page' === $key ? $v - 1 : $v;
             }
 
             return $this;
@@ -328,5 +332,18 @@ final class FilterData implements Serializable
         }
 
         return (int) $this->search['page'] ?: 0;
+    }
+
+    public function getLimit(): int
+    {
+        if (!$this->booted) {
+            $this->boot();
+        }
+
+        if (!isset($this->search['limit'])) {
+            throw new ApiProcessException('FilterData was not booted!');
+        }
+
+        return (int) $this->search['limit'] ?: 0;
     }
 }
