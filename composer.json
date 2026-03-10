@@ -16,21 +16,23 @@
         "php": "^8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^3.2",
-        "doctrine/orm": "^3.6",
+        "symfony/event-dispatcher": "^7.4||^8.0",
         "symfony/messenger": "^7.4||^8.0",
-        "symfony/options-resolver": "^7.4||^8.0",
         "symfony/property-access": "^7.4||^8.0",
         "symfony/property-info": "^7.4||^8.0",
         "symfony/serializer": "^7.4||^8.0",
         "symfony/validator": "^7.4||^8.0"
     },
     "require-dev": {
+        "doctrine/doctrine-bundle": "^3.2",
+        "doctrine/orm": "^3.6",
         "escapestudios/symfony2-coding-standard": "^3.18",
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^12.5",
         "squizlabs/php_codesniffer": "^4.0",
-        "symfony/security-core": "^7.4||^8.0"
+        "symfony/monolog-bundle": "^4.0",
+        "symfony/options-resolver": "^8.0",
+        "symfony/security-core": "^8.0"
     },
     "config": {
         "sort-packages": true

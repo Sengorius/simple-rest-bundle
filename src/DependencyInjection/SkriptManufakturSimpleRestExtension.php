@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -37,7 +39,8 @@ class SkriptManufakturSimpleRestExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-        // load the configuration
+        $this->checkBasicBundles();
+
         $configuration = $this->processConfiguration(new Configuration(), $configs);
 
         // register the simple services
@@ -46,14 +49,6 @@ class SkriptManufakturSimpleRestExtension extends Extension
             new Definition(ApiBusWrapper::class, [new Reference(MessageBusInterface::class)])
         );
         $container->setAlias('skriptmanufaktur.simple_rest.component.api_bus_wrapper', ApiBusWrapper::class);
-
-        if (!interface_exists(ValidatorInterface::class)) {
-            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Validator to be installed.');
-        }
-
-        if (!interface_exists(SerializerInterface::class)) {
-            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Serializer to be installed.');
-        }
 
         // register all our provider interfaces with a tag
         $abstractApiServices = [
@@ -130,5 +125,28 @@ class SkriptManufakturSimpleRestExtension extends Extension
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'addFlashbagMessages', 'priority' => 90])
         );
         $container->setAlias('skriptmanufaktur.simple_rest.listener.api_response', ApiResponseListener::class);
+    }
+
+    private function checkBasicBundles(): void
+    {
+        if (!interface_exists(Request::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Http-Foundation to be installed.');
+        }
+
+        if (!interface_exists(MessageBusInterface::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Messenger to be installed.');
+        }
+
+        if (!interface_exists(ValidatorInterface::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Validator to be installed.');
+        }
+
+        if (!interface_exists(SerializerInterface::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Serializer to be installed.');
+        }
+
+        if (!interface_exists(EventDispatcherInterface::class)) {
+            throw new LogicException('The SkriptManufakturSimpleRest needs a Symfony/Event-Dispatcher to be installed.');
+        }
     }
 }
