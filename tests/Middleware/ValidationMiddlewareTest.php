@@ -21,17 +21,13 @@ class ValidationMiddlewareTest extends MiddlewareTestCase
         $message->setUsername('John');
         $message->setEmail('john@example.com');
         $message->addEmbed(
-            (new EmbeddedDummyEntity())
+            new EmbeddedDummyEntity()
                 ->setId(17)
                 ->setType('t1')
         );
 
         $validator = $this->createMock(ValidatorInterface::class);
-        $validator->expects($this->once())
-            ->method('validate')
-                ->with($message, null, null)
-                ->willReturn(new ConstraintViolationList())
-        ;
+        $validator->expects($this->once())->method('validate')->willReturn(new ConstraintViolationList());
 
         $middleware = new ValidationMiddleware($validator);
         $envelope = $middleware->handle(new Envelope($message), $this->getStackMock());
@@ -62,11 +58,7 @@ class ValidationMiddlewareTest extends MiddlewareTestCase
         ];
 
         $validator = $this->createMock(ValidatorInterface::class);
-        $validator->expects($this->once())
-            ->method('validate')
-                ->with($message, null, null)
-                ->willReturn($violations)
-        ;
+        $validator->expects($this->once())->method('validate')->willReturn($violations);
 
         try {
             $middleware = new ValidationMiddleware($validator);

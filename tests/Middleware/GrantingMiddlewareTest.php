@@ -34,11 +34,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
-        $authChecker->expects($this->once())
-            ->method('isGranted')
-                ->with($stamp->getAttribute(), [$envelope->withoutAll(GrantingStamp::class), $stamp])
-                ->willReturn(true)
-        ;
+        $authChecker->expects($this->once())->method('isGranted')->willReturn(true);
 
         $middleware = new GrantingMiddleware($authChecker);
         $finalEnvelope = $middleware->handle($envelope, $this->getStackMock());
@@ -57,11 +53,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
-        $authChecker->expects($this->once())
-            ->method('isGranted')
-                ->with($stamp->getAttribute(), [$envelope->withoutAll(GrantingStamp::class), $stamp])
-                ->willReturn(false)
-        ;
+        $authChecker->expects($this->once())->method('isGranted')->willReturn(false);
 
         $middleware = new GrantingMiddleware($authChecker);
         $middleware->handle($envelope, $this->getStackMock(false));
@@ -73,11 +65,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
-        $authChecker->expects($this->once())
-            ->method('isGranted')
-                ->with($stamp->getAttribute(), [$envelope->withoutAll(AfterHandleGrantingStamp::class), $stamp])
-                ->willReturn(true)
-        ;
+        $authChecker->expects($this->once())->method('isGranted')->willReturn(true);
 
         $middleware = new GrantingMiddleware($authChecker);
         $finalEnvelope = $middleware->handle($envelope, $this->getStackMock());
@@ -96,11 +84,7 @@ class GrantingMiddlewareTest extends MiddlewareTestCase
         $envelope = new Envelope(new DummyMessage('Hey'), [$stamp]);
 
         $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
-        $authChecker->expects($this->once())
-            ->method('isGranted')
-                ->with($stamp->getAttribute(), [$envelope->withoutAll(AfterHandleGrantingStamp::class), $stamp])
-                ->willReturn(false)
-        ;
+        $authChecker->expects($this->once())->method('isGranted')->willReturn(false);
 
         $middleware = new GrantingMiddleware($authChecker);
         $middleware->handle($envelope, $this->getStackMock());

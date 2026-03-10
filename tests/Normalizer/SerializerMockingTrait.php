@@ -78,18 +78,10 @@ trait SerializerMockingTrait
         ;
 
         $objManager = $this->createStub(ObjectManager::class);
-        $objManager
-            ->method('getRepository')
-            ->with($className)
-            ->willReturn($repository)
-        ;
+        $objManager->method('getRepository')->willReturn($repository);
 
         $registry = $this->createStub(ManagerRegistry::class);
-        $registry
-            ->method('getManagerForClass')
-            ->with($className)
-            ->willReturn($objManager)
-        ;
+        $registry->method('getManagerForClass')->willReturn($objManager);
 
         return $registry;
     }
