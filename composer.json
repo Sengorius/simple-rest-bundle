@@ -32,14 +32,16 @@
         "squizlabs/php_codesniffer": "^4.0",
         "symfony/monolog-bundle": "^4.0",
         "symfony/options-resolver": "^8.0",
-        "symfony/security-core": "^8.0"
+        "symfony/security-core": "^8.0",
+        "symfony/uid": "^8.0"
     },
     "suggest": {
         "doctrine/doctrine-bundle": "^3.2",
         "doctrine/orm": "^3.6",
         "symfony/monolog-bundle": "^3.10||^4.0",
         "symfony/options-resolver": "^7.4||^8.0",
-        "symfony/security-core": "^7.4||^8.0"
+        "symfony/security-core": "^7.4||^8.0",
+        "symfony/uid": "^7.4||^8.0"
     },
     "config": {
         "sort-packages": true

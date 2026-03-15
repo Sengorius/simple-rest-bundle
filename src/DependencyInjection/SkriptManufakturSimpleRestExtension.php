@@ -11,9 +11,13 @@ use SkriptManufaktur\SimpleRestBundle\Component\EntityIdDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Component\EntityUuidDenormalizer;
 use SkriptManufaktur\SimpleRestBundle\Listener\ApiResponseListener;
 use SkriptManufaktur\SimpleRestBundle\Listener\RequestListener;
+use SkriptManufaktur\SimpleRestBundle\MessageTagging\UuidContextStack;
+use SkriptManufaktur\SimpleRestBundle\MessageTagging\UuidMiddleware;
+use SkriptManufaktur\SimpleRestBundle\MessageTagging\UuidProcessor;
 use SkriptManufaktur\SimpleRestBundle\Validation\ValidationMiddleware;
 use SkriptManufaktur\SimpleRestBundle\Voter\GrantingMiddleware;
 use SkriptManufaktur\SimpleRestBundle\Voter\RoleService;
+use Symfony\Bundle\MonologBundle\MonologBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
@@ -25,6 +29,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Uid\UuidV7;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SkriptManufakturSimpleRestExtension extends Extension
@@ -107,6 +112,27 @@ class SkriptManufakturSimpleRestExtension extends Extension
                 new Definition(RoleService::class, [new Parameter('security.role_hierarchy.roles')])
             );
             $container->setAlias('skriptmanufaktur.simple_rest.voter.role_service', RoleService::class);
+        }
+
+        // add message tagging, if UUIDs and Monolog are available
+        if (class_exists(UuidV7::class)) {
+            $container->setDefinition(UuidContextStack::class, new Definition(UuidContextStack::class));
+            $container->setAlias('skriptmanufaktur.simple_rest.tagging.context_stack', UuidContextStack::class);
+
+            $container->setDefinition(
+                UuidMiddleware::class,
+                new Definition(UuidMiddleware::class, [new Reference(UuidContextStack::class)])
+            );
+            $container->setAlias('skriptmanufaktur.simple_rest.tagging.middleware', UuidMiddleware::class);
+
+            if (class_exists(MonologBundle::class)) {
+                $container->setDefinition(
+                    UuidProcessor::class,
+                    new Definition(UuidProcessor::class, [new Reference(UuidContextStack::class)])
+                        ->addTag('monolog.processor')
+                );
+                $container->setAlias('skriptmanufaktur.simple_rest.tagging.processor', UuidProcessor::class);
+            }
         }
 
         // add listeners
