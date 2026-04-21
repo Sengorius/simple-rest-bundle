@@ -145,7 +145,7 @@ class SkriptManufakturSimpleRestExtension extends Extension
 
         $container->setDefinition(
             ApiResponseListener::class,
-            new Definition(ApiResponseListener::class, [$configuration['firewall_names']])
+            new Definition(ApiResponseListener::class, [$configuration['firewall_names'], $configuration['path_prefixes']])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.exception', 'method' => 'formatException', 'priority' => -10])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'testApiResponseType', 'priority' => 100])
                 ->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'addFlashbagMessages', 'priority' => 90])

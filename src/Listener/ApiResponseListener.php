@@ -23,8 +23,11 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 
 final readonly class ApiResponseListener
 {
-    /** @param string[] $firewallNames */
-    public function __construct(private array $firewallNames)
+    /**
+     * @param string[] $firewallNames
+     * @param string[] $pathPrefixes
+     */
+    public function __construct(private array $firewallNames, private array $pathPrefixes = [])
     {
     }
 
@@ -38,7 +41,7 @@ final readonly class ApiResponseListener
      */
     public function testApiResponseType(ResponseEvent $event): void
     {
-        if (!$this->belongsToFirewallContext($event->getRequest())) {
+        if (!$this->belongsToApiContext($event->getRequest())) {
             return;
         }
 
@@ -56,7 +59,7 @@ final readonly class ApiResponseListener
      */
     public function addFlashbagMessages(ResponseEvent $event): void
     {
-        if (!$this->belongsToFirewallContext($event->getRequest())) {
+        if (!$this->belongsToApiContext($event->getRequest())) {
             return;
         }
 
@@ -85,7 +88,7 @@ final readonly class ApiResponseListener
      */
     public function formatException(ExceptionEvent $event): void
     {
-        if (!$this->belongsToFirewallContext($event->getRequest())) {
+        if (!$this->belongsToApiContext($event->getRequest())) {
             return;
         }
 
@@ -177,12 +180,25 @@ final readonly class ApiResponseListener
             return false;
         }
 
-        foreach ($this->firewallNames as $fn) {
-            if (1 === preg_match('/'.$fn.'$/', $firewall)) {
-                return true;
-            }
+        return array_any(
+            $this->firewallNames,
+            fn (string $fn): bool => 1 === preg_match('/'.$fn.'$/', $firewall)
+        );
+    }
+
+    private function belongsToApiContext(Request $request): bool
+    {
+        if ($this->belongsToFirewallContext($request)) {
+            return true;
         }
 
-        return false;
+        // fallback: firewall context is not yet set on router-level exceptions (e.g. NotFoundHttpException
+        // from an unmatched route). In that case, detect API requests by path prefix.
+        $path = $request->getPathInfo();
+
+        return array_any(
+            $this->pathPrefixes,
+            fn (string $prefix): bool => str_starts_with($path, $prefix)
+        );
     }
 }
