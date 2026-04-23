@@ -45,6 +45,10 @@ final readonly class ApiResponseListener
             return;
         }
 
+        if ($this->isCorsPreflightRequest($event->getRequest())) {
+            return;
+        }
+
         if (($response = $event->getResponse()) instanceof ApiResponse) {
             return;
         }
@@ -163,6 +167,19 @@ final readonly class ApiResponseListener
         foreach ($exception->getViolations() as $violation) {
             $response->addValidationIssue($violation->getPropertyPath(), $violation->getMessage());
         }
+    }
+
+    /**
+     * CORS preflight responses are set by the CORS listener before the firewall runs,
+     * so they are never ApiResponse instances — skip validation for them.
+     *
+     * @param Request $request
+     *
+     * @return bool
+     */
+    private function isCorsPreflightRequest(Request $request): bool
+    {
+        return $request->isMethod('OPTIONS') && $request->headers->has('Access-Control-Request-Method');
     }
 
     /**
