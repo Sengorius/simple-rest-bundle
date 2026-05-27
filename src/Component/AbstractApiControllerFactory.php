@@ -44,8 +44,9 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
     /**
      * Mapper for normalization of a collection of entities
      *
-     * @param object[] $entities
-     * @param string[] $groups
+     * @param object[]     $entities
+     * @param string[]     $groups
+     * @param array<mixed> $additionalContext
      *
      * @phpstan-param T[] $entities
      *
@@ -53,9 +54,9 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
      *
      * @throws ApiProcessException
      */
-    protected function normalizeCollection(array $entities, array $groups = []): array
+    protected function normalizeCollection(array $entities, array $groups = [], array $additionalContext = []): array
     {
-        return array_map(fn (object $entity) => $this->normalize($entity, $groups), $entities);
+        return array_map(fn (object $entity) => $this->normalize($entity, $groups, $additionalContext), $entities);
     }
 
     /**
@@ -63,6 +64,7 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
      *
      * @param Pagination<T> $pagination
      * @param string[]      $groups
+     * @param array<mixed>  $additionalContext
      *
      * @return array{
      *     'count': int,
@@ -78,7 +80,7 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
      *     'items': array<mixed>,
      * }
      */
-    protected function normalizePagination(Pagination $pagination, array $groups = []): array
+    protected function normalizePagination(Pagination $pagination, array $groups = [], array $additionalContext = []): array
     {
         $pagination->boot();
 
@@ -93,7 +95,7 @@ abstract class AbstractApiControllerFactory extends AbstractApiHandlerFactory
             'isEmpty' => $pagination->isEmpty(),
             'isFirstPage' => $pagination->isFirstPage(),
             'isLastPage' => $pagination->isLastPage(),
-            'items' => $this->normalizeCollection($pagination->getPage(), $groups),
+            'items' => $this->normalizeCollection($pagination->getPage(), $groups, $additionalContext),
         ];
     }
 }

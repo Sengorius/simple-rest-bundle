@@ -30,14 +30,15 @@ abstract class AbstractApiHandlerFactory
     /**
      * Simple mapper from entity to array
      *
-     * @param object   $entity
-     * @param string[] $groups
+     * @param object       $entity
+     * @param string[]     $groups
+     * @param array<mixed> $additionalContext
      *
      * @return array<mixed>|\ArrayObject<int, null>|bool|float|int|string|null
      *
      * @throws ApiProcessException
      */
-    protected function normalize(object $entity, array $groups = []): array|\ArrayObject|bool|float|int|string|null
+    protected function normalize(object $entity, array $groups = [], array $additionalContext = []): array|\ArrayObject|bool|float|int|string|null
     {
         $context = [
             AbstractNormalizer::GROUPS => $groups,
@@ -55,7 +56,7 @@ abstract class AbstractApiHandlerFactory
         ];
 
         try {
-            return $this->serializer->normalize($entity, null, $context);
+            return $this->serializer->normalize($entity, null, array_merge($context, $additionalContext));
         } catch (ExceptionInterface $e) {
             throw new ApiProcessException($e->getMessage(), $e);
         }
@@ -69,17 +70,21 @@ abstract class AbstractApiHandlerFactory
      * @param object|null  $populated
      * @param string[]     $groups
      * @param string[]     $entityClassMap
+     * @param array<mixed> $additionalContext
      *
      * @return object
      *
      */
-    protected function denormalize(array $data, string $entityClass, object|null $populated = null, array $groups = [], array $entityClassMap = []): object
+    protected function denormalize(array $data, string $entityClass, object|null $populated = null, array $groups = [], array $entityClassMap = [], array $additionalContext = []): object
     {
-        $context = [
-            AbstractNormalizer::GROUPS => $groups,
-            AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false,
-            AbstractObjectNormalizer::DEEP_OBJECT_TO_POPULATE => true,
-        ];
+        $context = array_merge(
+            [
+                AbstractNormalizer::GROUPS => $groups,
+                AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false,
+                AbstractObjectNormalizer::DEEP_OBJECT_TO_POPULATE => true,
+            ],
+            $additionalContext
+        );
 
         if (null !== $populated) {
             $context[AbstractNormalizer::OBJECT_TO_POPULATE] = $populated;
