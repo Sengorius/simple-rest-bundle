@@ -34,4 +34,14 @@ class SinglePageTest extends TestCase
         $page = new SinglePage([5, 6], 5, 2, 10);
         $page->prevPage();
     }
+
+    public function testMapKeepsSameInstance(): void
+    {
+        $items = [1, 2, 3, 4, 5];
+        $pagination = new SinglePage($items, 3, 1, 10)->boot();
+        $mapped = $pagination->map(fn (int $i) => $i * 10);
+
+        self::assertInstanceOf(SinglePage::class, $mapped);
+        self::assertSame([10, 20, 30, 40, 50], array_values($mapped->getItems()));
+    }
 }

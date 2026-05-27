@@ -252,6 +252,21 @@ class Pagination extends AbstractPagination
         return $this->isEmpty;
     }
 
+    /**
+     * @template U of mixed
+     *
+     * @param callable(T): U $fn
+     *
+     * @return self<U>
+     */
+    public function map(callable $fn): self
+    {
+        $clone = clone $this;
+        $clone->items = array_map($fn, $this->items);
+
+        return $clone;
+    }
+
     public function hasFilters(): bool
     {
         return !empty($this->filters);

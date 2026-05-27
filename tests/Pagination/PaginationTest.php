@@ -33,24 +33,85 @@ class PaginationTest extends TestCase
     {
         $items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
-        $pagination = (new Pagination($items, 3))->boot();
+        $pagination = new Pagination($items, 3)->boot();
         self::assertSame(6, $pagination->getMaxPages());
 
-        $pagination = (new Pagination($items, 4))->boot();
+        $pagination = new Pagination($items, 4)->boot();
         self::assertSame(5, $pagination->getMaxPages());
 
-        $pagination = (new Pagination($items, 2))->boot();
+        $pagination = new Pagination($items, 2)->boot();
         self::assertSame(9, $pagination->getMaxPages());
 
-        $pagination = (new Pagination($items, 8))->boot();
+        $pagination = new Pagination($items, 8)->boot();
         self::assertSame(3, $pagination->getMaxPages());
+    }
+
+    public function testMapTransformsItems(): void
+    {
+        $items = [1, 2, 3, 4, 5];
+        $pagination = new Pagination($items, 3)->boot();
+        $mapped = $pagination->map(fn (int $i) => $i * 10);
+
+        self::assertSame([10, 20, 30, 40, 50], array_values($mapped->getItems()));
+    }
+
+    public function testMapReturnsNewInstance(): void
+    {
+        $items = [1, 2, 3];
+        $pagination = new Pagination($items, 3)->boot();
+        $mapped = $pagination->map(fn (int $i) => $i + 1);
+
+        self::assertNotSame($pagination, $mapped);
+        self::assertSame([1, 2, 3], array_values($pagination->getItems()));
+        self::assertSame([2, 3, 4], array_values($mapped->getItems()));
+    }
+
+    public function testMapPreservesPaginationState(): void
+    {
+        $items = [1, 2, 3, 4, 5, 6, 7];
+        $pagination = new Pagination($items, 3)->boot();
+        $pagination->getPage(1);
+
+        $mapped = $pagination->map(fn (int $i) => (string) $i);
+
+        self::assertSame(3, $mapped->getItemsPerPage());
+        self::assertSame(7, $mapped->getItemCount());
+        self::assertSame(3, $mapped->getMaxPages());
+        self::assertSame(1, $mapped->getCurrentPage());
+    }
+
+    public function testMapWithObjectsToScalars(): void
+    {
+        $items = [
+            (object) ['value' => 'a'],
+            (object) ['value' => 'b'],
+            (object) ['value' => 'c'],
+        ];
+
+        $pagination = new Pagination($items, 10)->boot();
+        $mapped = $pagination->map(fn (object $o) => $o->value);
+
+        self::assertSame(['a', 'b', 'c'], array_values($mapped->getItems()));
+    }
+
+    public function testMapPreservesFilters(): void
+    {
+        $items = [1, 2, 3, 4, 5, 6];
+        $pagination = new Pagination($items, 10);
+        $pagination->addFilter(fn (int $i) => $i % 2 === 0);
+        $pagination->boot();
+
+        $mapped = $pagination->map(fn(int $i) => $i * 100);
+
+        self::assertTrue($mapped->hasFilters());
+        self::assertCount(1, $mapped->getFilters());
     }
 
     public function testNextPages(): void
     {
         $perPage = 4;
         $items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
-        $pagination = (new Pagination($items, $perPage))->boot();
+        $pagination = new Pagination($items, $perPage)->boot();
 
         $page0 = $pagination->getPage();
         self::assertCount($perPage, $page0);
