@@ -92,8 +92,14 @@ class ExceptionTest extends TestCase
             ],
         ];
 
+        $expectedMessage = 'Validation for object "stdClass" has failed! Violations: '.
+            'name: Name not set; '.
+            'root: Global error; '.
+            'data[addresses]: Global address error; '.
+            'data[addresses][0]: Local address error';
+
         static::assertInstanceOf(RuntimeException::class, $exception);
-        static::assertSame('Validation for object "stdClass" has failed!', $exception->getMessage());
+        static::assertSame($expectedMessage, $exception->getMessage());
         static::assertSame($code, $exception->getCode());
         static::assertSame($previousException, $exception->getPrevious());
         static::assertSame('stdClass', $exception->getEntityClass());
@@ -101,6 +107,19 @@ class ExceptionTest extends TestCase
         static::assertArrayHasKey('root', $violations);
         static::assertCount(1, $violations['name']);
         static::assertSame($expectedViolations, $violations);
+    }
+
+    public function testValidationExceptionWithoutMessages(): void
+    {
+        $entity = new stdClass();
+        $violationList = new ConstraintViolationList([
+            new ConstraintViolation('', '', [], null, 'name', null),
+        ]);
+
+        $exception = new ValidationException($entity, $violationList);
+
+        static::assertSame('Validation for object "stdClass" has failed!', $exception->getMessage());
+        static::assertSame('Validation for object "stdClass" has failed!', new ValidationException($entity, new ConstraintViolationList())->getMessage());
     }
 
     public function testSingleValidationException(): void
@@ -117,7 +136,7 @@ class ExceptionTest extends TestCase
         ];
 
         static::assertInstanceOf(RuntimeException::class, $exception);
-        static::assertSame('Validation for object "stdClass" has failed!', $exception->getMessage());
+        static::assertSame('Validation for object "stdClass" has failed! Violations: root: Global error', $exception->getMessage());
         static::assertSame(334, $exception->getCode());
         static::assertSame('stdClass', $exception->getEntityClass());
         static::assertSame($expectedViolations, $violations);

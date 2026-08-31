@@ -24,7 +24,7 @@ class ValidationException extends RuntimeException
     public function __construct(object $entity, ConstraintViolationListInterface $violations, Throwable|null $previous = null)
     {
         parent::__construct(
-            sprintf('Validation for object "%s" has failed!', get_class($entity)),
+            self::buildMessage($entity, $violations),
             self::EXCEPTION_CODE,
             $previous
         );
@@ -76,5 +76,42 @@ class ValidationException extends RuntimeException
         }
 
         return $violations;
+    }
+
+    /**
+     * Builds the exception message, containing every violation, to make the actual
+     * cause visible in logs, where only the message is written
+     *
+     * @param object                           $entity
+     * @param ConstraintViolationListInterface $violations
+     *
+     * @return string
+     */
+    private static function buildMessage(object $entity, ConstraintViolationListInterface $violations): string
+    {
+        $message = sprintf('Validation for object "%s" has failed!', get_class($entity));
+        $stringified = [];
+
+        /** @var ConstraintViolationInterface $violation */
+        foreach ($violations as $violation) {
+            $violationMessage = trim((string) $violation->getMessage());
+
+            if ('' === $violationMessage) {
+                continue;
+            }
+
+            $propertyPath = trim($violation->getPropertyPath());
+            $stringified[] = sprintf(
+                '%s: %s',
+                '' !== $propertyPath ? $propertyPath : self::VALIDATION_ROOT_KEY,
+                $violationMessage
+            );
+        }
+
+        if (empty($stringified)) {
+            return $message;
+        }
+
+        return sprintf('%s Violations: %s', $message, implode('; ', $stringified));
     }
 }
