@@ -25,12 +25,23 @@ class RoleService extends RoleHierarchy
 
     /**
      * Get the map of roles, created by Symfony security component
+     * Symfony 8 builds the map with roles as keys and in another order than Symfony 7,
+     * so it is normalized into a sorted list here
      *
      * @return string[][]
      */
     public function getRolesMap(): array
     {
-        return $this->map;
+        $map = [];
+
+        foreach ($this->map as $role => $subRoles) {
+            $subRoles = array_values($subRoles);
+            sort($subRoles);
+
+            $map[$role] = $subRoles;
+        }
+
+        return $map;
     }
 
     /**
